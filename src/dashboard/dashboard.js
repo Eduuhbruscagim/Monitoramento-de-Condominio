@@ -79,7 +79,7 @@ const State = {
   carregandoOcorrencias: false,
   carregandoCaixa: false,
   carregandoNotificacoes: false,
-  carregandoKPIs: false, // Nova flag para controlar estado dos KPIs
+  carregandoKPIs: false,
 };
 
 // Helpers de Acesso Rápido
@@ -126,6 +126,20 @@ const MoradorService = {
   async salvar(dados, id) {
     return await supabase.from("moradores").update(dados).eq("id", id);
   },
+
+  // NOVO: Atualiza o perfil do próprio usuário logado
+  async atualizarMeuPerfil(id, dados) {
+    const { data, error } = await supabase
+        .from("moradores")
+        .update(dados)
+        .eq("id", id)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+  },
+
   async excluir(email) {
     return await supabase.from("moradores").delete().eq("email", email);
   },
@@ -349,6 +363,7 @@ const UI = {
   elements: {
     toastContainer: document.getElementById("toast-container"),
     userAvatar: document.getElementById("user-avatar"),
+    userAvatarImg: document.getElementById("user-avatar-img"),
     userName: document.getElementById("user-name"),
     userRole: document.getElementById("user-role"),
     kpiSaldo: document.getElementById("kpi-saldo"),
@@ -417,17 +432,28 @@ const UI = {
       perfil.cargo === "Dono"
         ? "Dono"
         : perfil.cargo === "admin"
-          ? "Síndico"
-          : "Morador";
+        ? "Síndico"
+        : "Morador";
     if (this.elements.userRole)
       this.elements.userRole.innerText = cargoAmigavel;
-    if (this.elements.userAvatar)
-      this.elements.userAvatar.innerText = nome.charAt(0).toUpperCase();
+
+    // Lógica para alternar entre Foto e Letra na Sidebar
+    if (perfil.img && perfil.img.trim() !== "") {
+        if (this.elements.userAvatar) this.elements.userAvatar.style.display = "none";
+        if (this.elements.userAvatarImg) {
+            this.elements.userAvatarImg.src = perfil.img;
+            this.elements.userAvatarImg.style.display = "block";
+        }
+    } else {
+        if (this.elements.userAvatarImg) this.elements.userAvatarImg.style.display = "none";
+        if (this.elements.userAvatar) {
+            this.elements.userAvatar.innerText = nome.charAt(0).toUpperCase();
+            this.elements.userAvatar.style.display = "flex";
+        }
+    }
   },
 
   async renderizarKPIs() {
-    // STALE-WHILE-REVALIDATE: Mantém valor antigo visível até o novo chegar.
-
     // 1. Saldo (KPI)
     if (this.elements.kpiSaldo) {
       const { data, error } = await CaixaService.saldo();
@@ -475,11 +501,11 @@ const UI = {
   async renderizarAtividadesRecentes() {
     if (!this.elements.recentActivities) return;
 
-    // Se já tiver cache, renderiza ele PRIMEIRO para evitar skeleton flicker
+    // Cache First
     const temCache = State.reservasCache && State.reservasCache.length > 0;
 
     if (!temCache) {
-      // SKELETON (Só aparece se não tiver nada na memória)
+      // SKELETON
       this.elements.recentActivities.innerHTML = Array(1)
         .fill(0)
         .map(
@@ -495,11 +521,10 @@ const UI = {
         )
         .join("");
     } else {
-      // Renderiza cache imediatamente
-      this._renderActivitiesList(State.reservasCache);
+        this._renderActivitiesList(State.reservasCache);
     }
 
-    // Busca dados frescos em background
+    // Background fetch
     const { data, error } = await ReservaService.listar();
 
     if (error) {
@@ -508,7 +533,6 @@ const UI = {
       return;
     }
 
-    // Atualiza cache e UI com dados novos
     State.reservasCache = data;
     this._renderActivitiesList(data);
   },
@@ -615,13 +639,11 @@ const UINotifications = {
   },
 
   async render() {
-    // 1. Cache Instantâneo
     if (State.notificacoesCache) {
       this.renderHTML(State.notificacoesCache);
       return;
     }
 
-    // 2. Skeleton + Fetch
     if (State.carregandoNotificacoes) return;
     State.carregandoNotificacoes = true;
 
@@ -661,8 +683,9 @@ const UINotifications = {
       .map(
         (item) => `
       <div class="notif-item">
-        <div class="notif-icon ${item.color}"><i class="fa-solid ${item.icon
-          }"></i></div>
+        <div class="notif-icon ${item.color}"><i class="fa-solid ${
+          item.icon
+        }"></i></div>
         <div class="notif-content">
           <span class="notif-title">${Utils.safe(item.titulo)}</span>
           <span class="notif-desc">${Utils.safe(item.desc)}</span>
@@ -675,6 +698,164 @@ const UINotifications = {
       )
       .join("");
   },
+};
+
+// Controlador de Configurações (NOVO)
+const UIConfig = {
+    btn: document.getElementById("btn-configuracoes"),
+    modal: document.getElementById("modal-configuracoes"),
+    tabs: document.querySelectorAll(".tab-btn"),
+    panes: document.querySelectorAll(".tab-pane"),
+    formPerfil: document.getElementById("form-config-perfil"),
+    formSenha: document.getElementById("form-config-senha"),
+    btnLogoutOthers: document.getElementById("btn-logout-others"),
+
+    init() {
+        if (!this.btn) return;
+
+        // Abrir modal e preencher dados
+        this.btn.addEventListener("click", () => {
+            this.preencherDados();
+            ModalUX.open(this.modal);
+        });
+
+        // Alternar abas
+        this.tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                const targetId = tab.dataset.tab;
+
+                // Atualiza botões
+                this.tabs.forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+
+                // Atualiza conteúdo
+                this.panes.forEach(p => p.classList.remove("active"));
+                document.getElementById(targetId).classList.add("active");
+            });
+        });
+
+        // Salvar Perfil
+        if (this.formPerfil) {
+            this.formPerfil.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                await this.salvarPerfil();
+            });
+        }
+
+        // Trocar Senha
+        if (this.formSenha) {
+            this.formSenha.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                await this.trocarSenha();
+            });
+        }
+
+        // Logout Outros Dispositivos
+        if (this.btnLogoutOthers) {
+            this.btnLogoutOthers.addEventListener("click", async () => {
+                const btn = this.btnLogoutOthers;
+                const original = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Encerrando...`;
+
+                // Global SignOut (Scope: Global)
+                const { error } = await supabase.auth.signOut({ scope: 'global' });
+
+                if (error) {
+                    UI.showToast("Erro ao encerrar sessões.", "error");
+                    btn.innerHTML = original;
+                    btn.disabled = false;
+                } else {
+                    UI.showToast("Sessões encerradas. Faça login novamente.", "success");
+                    setTimeout(() => window.location.href = "../auth/login.html", 2000);
+                }
+            });
+        }
+    },
+
+    preencherDados() {
+        const u = State.usuarioLogado;
+        if (!u) return;
+
+        document.getElementById("cfg-nome").value = u.nome || "";
+        document.getElementById("cfg-celular").value = u.celular || "";
+        document.getElementById("cfg-email").value = u.email || "";
+        document.getElementById("cfg-img-url").value = u.img || "";
+        document.getElementById("cfg-preview-img").src = u.img || `https://ui-avatars.com/api/?name=${u.nome}`;
+
+        // Unidade e Bloco (ReadOnly)
+        if (u.unidade && u.unidade.includes(" - Bloco ")) {
+            const [un, bl] = u.unidade.split(" - Bloco ");
+            document.getElementById("cfg-unidade").value = un;
+            document.getElementById("cfg-bloco").value = bl;
+        } else {
+            document.getElementById("cfg-unidade").value = u.unidade || "";
+            document.getElementById("cfg-bloco").value = "";
+        }
+    },
+
+    async salvarPerfil() {
+        const btn = this.formPerfil.querySelector("button");
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "Salvando...";
+
+        try {
+            const nome = document.getElementById("cfg-nome").value;
+            const celular = document.getElementById("cfg-celular").value;
+            const imgUrl = document.getElementById("cfg-img-url").value;
+
+            // Se vazio, usa avatar gerado
+            const imgFinal = imgUrl.trim() !== "" ? imgUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=random`;
+
+            const novosDados = { nome, celular, img: imgFinal };
+
+            // Atualiza no Banco
+            await MoradorService.atualizarMeuPerfil(State.usuarioLogado.id, novosDados);
+
+            // Atualiza State Local e UI
+            State.usuarioLogado = { ...State.usuarioLogado, ...novosDados };
+            UI.atualizarSidebar(State.usuarioLogado);
+            document.getElementById("cfg-preview-img").src = imgFinal;
+
+            UI.showToast("Perfil atualizado!", "success");
+
+            // Opcional: Fechar modal
+            // ModalUX.close(this.modal);
+
+        } catch (error) {
+            console.error(error);
+            UI.showToast("Erro ao salvar: " + error.message, "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
+    },
+
+    async trocarSenha() {
+        const nova = document.getElementById("cfg-nova-senha").value;
+        const conf = document.getElementById("cfg-confirma-senha").value;
+
+        if (nova.length < 6) return UI.showToast("Mínimo 6 caracteres.", "error");
+        if (nova !== conf) return UI.showToast("Senhas não conferem.", "error");
+
+        const btn = this.formSenha.querySelector("button");
+        btn.disabled = true;
+        btn.innerText = "Atualizando...";
+
+        try {
+            const { error } = await supabase.auth.updateUser({ password: nova });
+            if (error) throw error;
+
+            UI.showToast("Senha alterada com sucesso!", "success");
+            this.formSenha.reset();
+        } catch (error) {
+            UI.showToast("Erro: " + error.message, "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Atualizar Senha";
+        }
+    }
 };
 
 // Controlador de Reservas
@@ -764,7 +945,7 @@ const UIReserva = {
           await this.carregar();
           UI.showToast(error.message, "error");
         } else {
-          State.notificacoesCache = null;
+            State.notificacoesCache = null;
         }
       });
     }
@@ -807,16 +988,16 @@ const UIReserva = {
 
         const cols = souDono
           ? `<td data-label="Data" class="td-destaque">${dataObj.toLocaleDateString(
-            "pt-BR"
-          )}</td>
+              "pt-BR"
+            )}</td>
            <td data-label="Área" class="td-titulo">${Utils.safe(r.area)}</td>
            <td data-label="Reservado Por" class="td-texto">${Utils.safe(
-            r.nome_morador
-          )}</td>
+             r.nome_morador
+           )}</td>
            <td class="td-acao">${btn}</td>`
           : `<td data-label="Data" class="td-destaque">${dataObj.toLocaleDateString(
-            "pt-BR"
-          )}</td>
+              "pt-BR"
+            )}</td>
            <td data-label="Área" class="td-titulo">${Utils.safe(r.area)}</td>
            <td class="td-acao">${btn}</td>`;
 
@@ -841,10 +1022,11 @@ const UIReserva = {
         <tr>
           <td><div class="skeleton skeleton-text" style="width:80px"></div></td>
           <td><div class="skeleton skeleton-text" style="width:120px"></div></td>
-          ${souDono
+          ${
+            souDono
               ? '<td><div class="skeleton skeleton-text" style="width:100px"></div></td>'
               : ""
-            }
+          }
           <td><div class="skeleton skeleton-text" style="width:30px"></div></td>
         </tr>
       `
@@ -922,7 +1104,7 @@ const UIOcorrencias = {
           await this.carregar();
           UI.showToast(error.message, "error");
         } else {
-          State.notificacoesCache = null; // Invalida notificações
+            State.notificacoesCache = null; // Invalida notificações
         }
       });
     }
@@ -960,7 +1142,7 @@ const UIOcorrencias = {
           await this.carregar();
           UI.showToast(error.message, "error");
         } else {
-          State.notificacoesCache = null;
+            State.notificacoesCache = null;
         }
       });
     }
@@ -1045,11 +1227,12 @@ const UIOcorrencias = {
         <tr>
           <td><div class="skeleton skeleton-text" style="width:80px"></div></td>
           <td><div class="skeleton skeleton-text" style="width:150px"></div></td>
-          ${souAdmin
+          ${
+            souAdmin
               ? `<td><div class="skeleton skeleton-text" style="width:100px"></div></td>
              <td><div class="skeleton skeleton-text" style="width:100px"></div></td>`
               : ""
-            }
+          }
           <td><div class="skeleton skeleton-text" style="width:70px"></div></td>
           <td><div class="skeleton skeleton-text" style="width:30px"></div></td>
         </tr>
@@ -1092,9 +1275,9 @@ const UICaixa = {
       this.btnVer.addEventListener("click", () => {
         // CACHE: Usa memória se tiver
         if (State.caixaCache && State.caixaCache.length > 0) {
-          this.renderizarLista(State.caixaCache);
+            this.renderizarLista(State.caixaCache);
         } else {
-          this.carregarExtrato();
+            this.carregarExtrato();
         }
         ModalUX.open(this.modalHistorico);
       });
@@ -1134,10 +1317,10 @@ const UICaixa = {
     State.carregandoCaixa = true;
 
     if (!this.listaHistorico.children.length) {
-      this.listaHistorico.innerHTML = Array(1)
+        this.listaHistorico.innerHTML = Array(1)
         .fill(0)
         .map(
-          () => `
+            () => `
         <tr>
             <td><div class="skeleton skeleton-text" style="width:80px"></div></td>
             <td><div class="skeleton skeleton-text" style="width:60px"></div></td>
@@ -1150,41 +1333,41 @@ const UICaixa = {
     }
 
     try {
-      const { data, error } = await CaixaService.listarPublico();
-      if (error) throw error;
+        const { data, error } = await CaixaService.listarPublico();
+        if (error) throw error;
 
-      State.caixaCache = data || [];
-      this.renderizarLista(State.caixaCache);
-    } catch (err) {
-      this.listaHistorico.innerHTML = `<tr><td colspan="4" style="text-align:center">Erro.</td></tr>`;
+        State.caixaCache = data || [];
+        this.renderizarLista(State.caixaCache);
+    } catch(err) {
+        this.listaHistorico.innerHTML = `<tr><td colspan="4" style="text-align:center">Erro.</td></tr>`;
     } finally {
-      State.carregandoCaixa = false;
+        State.carregandoCaixa = false;
     }
   },
 
   renderizarLista(data) {
     if (!data?.length) {
-      this.listaHistorico.innerHTML = `<tr><td colspan="4" style="text-align:center">Sem movimentações.</td></tr>`;
-      return;
-    }
+        this.listaHistorico.innerHTML = `<tr><td colspan="4" style="text-align:center">Sem movimentações.</td></tr>`;
+        return;
+      }
 
-    this.listaHistorico.innerHTML = data
-      .map((m) => {
-        const d = new Date(m.created_at).toLocaleDateString("pt-BR");
-        const tipo = m.tipo === "entrada" ? "Entrada" : "Saída";
+      this.listaHistorico.innerHTML = data
+        .map((m) => {
+          const d = new Date(m.created_at).toLocaleDateString("pt-BR");
+          const tipo = m.tipo === "entrada" ? "Entrada" : "Saída";
 
-        return `<tr>
+          return `<tr>
           <td data-label="Data" class="td-destaque"><strong>${d}</strong></td>
           <td data-label="Tipo" class="td-texto">${tipo}</td>
           <td data-label="Valor" class="td-titulo"><strong>${Utils.formatBRL(
-          m.valor
-        )}</strong></td>
+            m.valor
+          )}</strong></td>
           <td data-label="Descrição" class="td-texto" style="vertical-align: middle;">${Utils.safe(
-          m.descricao
-        )}</td>
+            m.descricao
+          )}</td>
         </tr>`;
-      })
-      .join("");
+        })
+        .join("");
   }
 };
 
@@ -1215,8 +1398,9 @@ const UIMoradores = {
       const btn = this.form.querySelector("button");
       btn.disabled = true;
 
-      const unidade = `${document.getElementById("unidade-num").value
-        } - Bloco ${document.getElementById("unidade-bloco").value}`;
+      const unidade = `${
+        document.getElementById("unidade-num").value
+      } - Bloco ${document.getElementById("unidade-bloco").value}`;
 
       const dados = {
         nome: document.getElementById("nome").value,
@@ -1330,8 +1514,8 @@ const UIMoradores = {
           <div class="user-cell">
             <img src="${m.img || `https://ui-avatars.com/api/?name=${m.nome}`}" class="user-avatar" />
             <div><strong class="td-titulo">${Utils.safe(
-          m.nome
-        )}</strong><br/><small>${Utils.safe(m.tipo)}</small></div>
+              m.nome
+            )}</strong><br/><small>${Utils.safe(m.tipo)}</small></div>
           </div>
         </td>
         <td class="td-texto"><strong>${Utils.safe(m.unidade)}</strong></td>
@@ -1366,6 +1550,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     UICaixa.init();
     UIMoradores.init();
     UINotifications.init();
+    UIConfig.init(); // Init UIConfig
 
     await Promise.all([
       UI.renderizarKPIs(),
