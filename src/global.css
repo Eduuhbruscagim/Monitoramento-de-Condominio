@@ -7,321 +7,417 @@ Versão: 2.2 (Transições Suaves Globais)
 1. VARIÁVEIS & DESIGN TOKENS
 -------------------------------------------------------------------------- */
 :root {
-    /* --- PALETA LÓGICA (LIGHT MODE DEFAULT) --- */
-    --bg-body: radial-gradient(circle at 50% 0%, #eef2ff 0%, #e0e7ff 50%, #f3f4f6 100%);
+  /* --- PALETA LÓGICA (LIGHT MODE DEFAULT) --- */
+  --bg-body: radial-gradient(circle at 50% 0%, #eef2ff 0%, #e0e7ff 50%, #f3f4f6 100%);
 
-    /* VIDRO AGRESSIVO */
-    --bg-glass-nav: rgba(255, 255, 255, 0.35);
-    --bg-card: rgba(255, 255, 255, 0.45);
-    --bg-input: rgba(255, 255, 255, 0.55);
-    --bg-input-focus: #ffffff;
+  /* VIDRO AGRESSIVO */
+  --bg-glass-nav: rgba(255, 255, 255, 0.35);
+  --bg-card: rgba(255, 255, 255, 0.45);
+  --bg-input: rgba(255, 255, 255, 0.55);
+  --bg-input-focus: #ffffff;
 
-    --text-main: #0f172a;
-    --text-secondary: #64748b;
-    --text-inverse: #ffffff;
+  --text-main: #0f172a;
+  --text-secondary: #64748b;
+  --text-inverse: #ffffff;
 
-    --border-glass: rgba(255, 255, 255, 0.8);
-    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --border-glass: rgba(255, 255, 255, 0.8);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
-    --secondary: #06b6d4;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary: #06b6d4;
 
-    /* Status Colors */
-    --success-bg: rgba(34, 197, 94, 0.1);
-    --success-text: #15803d;
-    --error-bg: rgba(239, 68, 68, 0.1);
-    --error-text: #b91c1c;
+  /* Status Colors */
+  --success-bg: rgba(34, 197, 94, 0.1);
+  --success-text: #15803d;
+  --error-bg: rgba(239, 68, 68, 0.1);
+  --error-text: #b91c1c;
 
-    /* --- FÍSICA & FORMA --- */
-    --radius: 24px;
-    --radius-sm: 12px;
+  /* --- FÍSICA & FORMA --- */
+  --radius: 24px;
+  --radius-sm: 12px;
 
-    /* Apple Physics Engine */
-    --ease-spring: cubic-bezier(0.19, 1, 0.22, 1);
-    --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
-    --ease-flow: cubic-bezier(0.4, 0, 0.2, 1);
-  }
+  /* Apple Physics Engine */
+  --ease-spring: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-flow: cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-  /* --- DARK MODE OVERRIDES --- */
-  [data-theme="dark"] {
-    --bg-body: radial-gradient(circle at 50% 0%, #0f172a 0%, #1e293b 50%, #020617 100%);
-    --bg-glass-nav: rgba(15, 23, 42, 0.45);
-    --bg-card: rgba(30, 41, 59, 0.50);
-    --bg-input: rgba(15, 23, 42, 0.60);
-    --bg-input-focus: rgba(30, 41, 59, 0.9);
+/* --- DARK MODE OVERRIDES --- */
+[data-theme="dark"] {
+  --bg-body: radial-gradient(circle at 50% 0%, #0f172a 0%, #1e293b 50%, #020617 100%);
+  --bg-glass-nav: rgba(15, 23, 42, 0.45);
+  --bg-card: rgba(30, 41, 59, 0.50);
+  --bg-input: rgba(15, 23, 42, 0.60);
+  --bg-input-focus: rgba(30, 41, 59, 0.9);
 
-    --text-main: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-inverse: #0f172a;
+  --text-main: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-inverse: #0f172a;
 
-    --border-glass: rgba(255, 255, 255, 0.1);
-    --shadow-glass: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+  --border-glass: rgba(255, 255, 255, 0.1);
+  --shadow-glass: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
 
-    --primary: #3b82f6;
-    --primary-hover: #60a5fa;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
 
-    /* Status Colors (Dark) */
-    --success-bg: rgba(34, 197, 94, 0.2);
-    --success-text: #4ade80;
-    --error-bg: rgba(239, 68, 68, 0.2);
-    --error-text: #f87171;
-  }
+  /* Status Colors (Dark) */
+  --success-bg: rgba(34, 197, 94, 0.2);
+  --success-text: #4ade80;
+  --error-bg: rgba(239, 68, 68, 0.2);
+  --error-text: #f87171;
+}
 
-  /* --------------------------------------------------------------------------
+/* --------------------------------------------------------------------------
   2. RESETS & TIPOGRAFIA
   -------------------------------------------------------------------------- */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
 
-  html {
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 
-  ::-webkit-scrollbar {
-    display: none;
-  }
+::-webkit-scrollbar {
+  display: none;
+}
 
-  body {
-    background: var(--bg-body);
-    background-attachment: fixed;
-    background-size: cover;
-    color: var(--text-main);
-    min-height: 100vh;
-    line-height: 1.6;
-    overflow-x: hidden;
-    /* Transição suave ao trocar de tema */
-    transition: background 0.5s var(--ease-flow), color 0.3s ease;
-  }
+body {
+  background: var(--bg-body);
+  background-attachment: fixed;
+  background-size: cover;
+  color: var(--text-main);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+  /* Transição suave ao trocar de tema */
+  transition: background 0.5s var(--ease-flow), color 0.3s ease;
+}
 
-  /* --------------------------------------------------------------------------
+/* --------------------------------------------------------------------------
   3. UTILITÁRIOS & LAYOUT
   -------------------------------------------------------------------------- */
-  .container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
 
-  /* Classes Utilitárias de Texto */
-  .text-main { color: var(--text-main) !important; }
-  .text-sec { color: var(--text-secondary) !important; }
+/* Classes Utilitárias de Texto */
+.text-main {
+  color: var(--text-main) !important;
+}
 
-  /* --------------------------------------------------------------------------
+.text-sec {
+  color: var(--text-secondary) !important;
+}
+
+/* --------------------------------------------------------------------------
   4. FÍSICA INTERATIVA GLOBAL (ATUALIZADO)
   -------------------------------------------------------------------------- */
 
-  /* 🎯 Transições Suaves para TODOS os elementos interativos */
-  button, .btn, .action-btn, .kpi-plus, .kpi-eye, .icon-btn, .btn-settings,
-  a.menu-item, input, select, textarea, .glass-select, .input-wrapper,
-  .card-glass, .btn-icon-glass, .stat-card, .activity-item, .notif-item,
-  .tab-btn, .close-modal, .user-avatar, .status-badge, .toast, .modal-glass,
-  .notifications-dropdown, .user-profile-mini, .sidebar-logo {
-    transition: all 0.4s var(--ease-spring);
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-  }
+/* 🎯 Transições Suaves para TODOS os elementos interativos */
+button,
+.btn,
+.action-btn,
+.kpi-plus,
+.kpi-eye,
+.icon-btn,
+.btn-settings,
+a.menu-item,
+input,
+select,
+textarea,
+.glass-select,
+.input-wrapper,
+.card-glass,
+.btn-icon-glass,
+.stat-card,
+.activity-item,
+.notif-item,
+.tab-btn,
+.close-modal,
+.user-avatar,
+.status-badge,
+.toast,
+.modal-glass,
+.notifications-dropdown,
+.user-profile-mini,
+.sidebar-logo {
+  transition: all 0.4s var(--ease-spring);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  /* 📱 Feedback Tátil Global (Encolher ao clicar) */
-  button:active, .btn:active, .action-btn:active, .icon-btn:active,
-  a.menu-item:active, .btn-icon-glass:active, .kpi-plus:active,
-  .kpi-eye:active, .tab-btn:active, .close-modal:active {
-    transform: scale(0.96) !important;
-  }
+/* 📱 Feedback Tátil Global (Encolher ao clicar) */
+button:active,
+.btn:active,
+.action-btn:active,
+.icon-btn:active,
+a.menu-item:active,
+.btn-icon-glass:active,
+.kpi-plus:active,
+.kpi-eye:active,
+.tab-btn:active,
+.close-modal:active {
+  transform: scale(0.96) !important;
+}
 
-  /* ✨ Inputs Focus Global com Levitação */
-  .input-wrapper:focus-within,
-  input:focus,
-  select:focus,
-  textarea:focus,
-  .glass-select:focus {
-    transform: translateY(-1px);
-    background-color: var(--bg-input-focus);
-    border-color: var(--border-glass);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-  }
+/* ✨ Inputs Focus Global com Levitação */
+.input-wrapper:focus-within,
+input:focus,
+select:focus,
+textarea:focus,
+.glass-select:focus {
+  transform: translateY(-1px);
+  background-color: var(--bg-input-focus);
+  border-color: var(--border-glass);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
 
-  /* 🎨 Hover suave para links e botões */
-  a, button, .btn {
-    transition: all 0.3s var(--ease-flow);
-  }
+/* 🎨 Hover suave para links e botões */
+a,
+button,
+.btn {
+  transition: all 0.3s var(--ease-flow);
+}
 
-  /* --------------------------------------------------------------------------
+/* --------------------------------------------------------------------------
   5. COMPONENTES BASE (BOTÕES)
   -------------------------------------------------------------------------- */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 28px;
-    border-radius: 12px;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 0.95rem;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.3s var(--ease-spring);
-  }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.3s var(--ease-spring);
+}
 
-  .btn-primary {
-    background-color: var(--primary);
-    color: #ffffff;
-    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
-  }
+.btn-primary {
+  background-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
 
-  .btn-primary:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(37, 99, 235, 0.3);
-  }
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(37, 99, 235, 0.3);
+}
 
-  .btn-outline {
-    background-color: transparent;
-    border: 1px solid var(--primary);
-    color: var(--primary);
-  }
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
 
-  .btn-outline:hover {
-    background-color: rgba(37, 99, 235, 0.1);
-    transform: translateY(-2px);
-  }
+.btn-outline:hover {
+  background-color: rgba(37, 99, 235, 0.1);
+  transform: translateY(-2px);
+}
 
-  /* Botão Full Width */
-  .btn-full {
-    width: 100%;
-    justify-content: center;
-  }
+/* Botão Full Width */
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
 
-  /* Botão Redondo de Vidro */
-  .btn-icon-glass {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid var(--border-glass);
-    color: var(--text-main);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: all 0.4s var(--ease-spring);
-  }
+/* Botão Redondo de Vidro */
+.btn-icon-glass {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border-glass);
+  color: var(--text-main);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.4s var(--ease-spring);
+}
 
-  .btn-icon-glass:hover {
-    background: var(--primary);
-    color: #ffffff;
-    border-color: transparent;
-    transform: translateY(-2px);
-  }
+.btn-icon-glass:hover {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: transparent;
+  transform: translateY(-2px);
+}
 
-  /* --------------------------------------------------------------------------
+/* --------------------------------------------------------------------------
   6. CLASSES PADRÃO DE VIDRO (Consistência Visual)
   -------------------------------------------------------------------------- */
-  .glass-panel {
-    background: var(--bg-card);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid var(--border-glass);
-    box-shadow: var(--shadow-glass);
-    border-radius: var(--radius);
-    transition: all 0.3s var(--ease-flow);
-  }
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius);
+  transition: all 0.3s var(--ease-flow);
+}
 
-  .glass-panel:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-  }
+.glass-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
 
-  /* --------------------------------------------------------------------------
+/* --------------------------------------------------------------------------
   7. RODAPÉ & DEMAIS COMPONENTES
   -------------------------------------------------------------------------- */
-  footer {
-    border-top: 1px solid var(--border-glass);
-    padding: 30px 0;
-    background: var(--bg-card);
-    backdrop-filter: blur(10px);
-    position: relative;
-    z-index: 1;
+footer {
+  border-top: 1px solid var(--border-glass);
+  padding: 30px 0;
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-links a {
+  margin-left: 30px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.3s var(--ease-flow);
+}
+
+.footer-links a:hover {
+  color: var(--primary);
+}
+
+/* --------------------------------------------------------------------------
+  8. ANIMAÇÕES GLOBAIS
+  -------------------------------------------------------------------------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
 
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s var(--ease-spring);
+}
+
+.slide-in {
+  animation: slideIn 0.5s var(--ease-spring);
+}
+
+/* --------------------------------------------------------------------------
+  9. RESPONSIVIDADE BÁSICA
+  -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
   .footer-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 30px;
+    text-align: center;
   }
 
   .footer-links a {
-    margin-left: 30px;
-    text-decoration: none;
-    color: var(--text-secondary);
-    font-weight: 500;
-    transition: color 0.3s var(--ease-flow);
+    margin: 0 15px;
+    display: inline-block;
   }
 
-  .footer-links a:hover {
-    color: var(--primary);
+  /* Transições mais rápidas no mobile para performance */
+  button,
+  .btn,
+  .action-btn,
+  a.menu-item {
+    transition: all 0.2s var(--ease-snappy);
   }
+}
 
-  /* --------------------------------------------------------------------------
-  8. ANIMAÇÕES GLOBAIS
-  -------------------------------------------------------------------------- */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateX(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
+/* ==========================================================================
+OTIMIZAÇÃO DE PERFORMANCE
+========================================================================== */
 
-  .fade-in {
-    animation: fadeIn 0.5s var(--ease-spring);
-  }
+/* 🎯 Will-Change: Força GPU a criar camada separada */
+.glass-panel,
+.login-card,
+.stat-card,
+.activity-item,
+.btn,
+.btn-icon-glass,
+.input-wrapper input,
+.input-wrapper select,
+.modal-glass,
+.notifications-dropdown,
+nav {
+  will-change: transform, opacity;
+}
 
-  .slide-in {
-    animation: slideIn 0.5s var(--ease-spring);
-  }
+/* Remove will-change após animação terminar para liberar memória */
+.glass-panel:hover,
+.stat-card:hover,
+.btn:hover {
+  will-change: auto;
+}
 
-  /* --------------------------------------------------------------------------
-  9. RESPONSIVIDADE BÁSICA
-  -------------------------------------------------------------------------- */
-  @media (max-width: 768px) {
-    .footer-content {
-      flex-direction: column;
-      gap: 30px;
-      text-align: center;
-    }
 
-    .footer-links a {
-      margin: 0 15px;
-      display: inline-block;
-    }
+/* 💻 FALLBACK para computadores fracos */
+.low-performance .glass-panel,
+.low-performance .login-card,
+.low-performance nav,
+.low-performance .stat-card,
+.low-performance .modal-glass {
+  /* Remove blur pesado */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 
-    /* Transições mais rápidas no mobile para performance */
-    button, .btn, .action-btn, a.menu-item {
-      transition: all 0.2s var(--ease-snappy);
-    }
-  }
+  /* Substitui por fundo sólido levemente transparente */
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.low-performance[data-theme="dark"] .glass-panel,
+.low-performance[data-theme="dark"] .login-card,
+.low-performance[data-theme="dark"] nav,
+.low-performance[data-theme="dark"] .stat-card,
+.low-performance[data-theme="dark"] .modal-glass {
+  background: rgba(30, 41, 59, 0.95) !important;
+}
+
+/* Reduz transições */
+.low-performance * {
+  transition-duration: 0.15s !important;
+}

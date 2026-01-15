@@ -4,7 +4,7 @@
    DESCRIÇÃO: Estilos da Landing Page com Floating Dock e Correções de Contraste
    ========================================================================== */
 
-   
+
 /* --------------------------------------------------------------------------
    2. FLOATING DOCK NAVIGATION (A estrela do show)
    -------------------------------------------------------------------------- */
@@ -417,4 +417,47 @@
     .laptop-mockup { transform: rotateY(0) rotateX(0); }
 
     .feature-card:hover { transform: translateY(-5px); }
+}
+
+/* ==========================================================================
+OTIMIZAÇÃO DE PERFORMANCE - LOGIN
+========================================================================== */
+
+/* 🎯 Will-Change para elementos do login */
+.login-card,
+.input-wrapper input,
+.input-wrapper select,
+.btn-full,
+.back-link {
+  will-change: transform, opacity;
+}
+
+/* Remove will-change após hover */
+.btn-full:hover,
+.back-link:hover {
+  will-change: auto;
+}
+
+/* 💻 Fallback para low-performance no login */
+.low-performance .login-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.low-performance[data-theme="dark"] .login-card {
+  background: rgba(30, 41, 59, 0.98) !important;
+}
+
+/* Desabilita animações de entrada em low-mode */
+.low-performance .login-card {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.low-performance .login-header img {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
 }

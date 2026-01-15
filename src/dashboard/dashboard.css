@@ -1749,3 +1749,52 @@ TABS NO MODAL DE CONFIGURAÇÕES
     animation-duration: 1.8s;
   }
 }
+
+/* ==========================================================================
+OTIMIZAÇÃO DE PERFORMANCE - DASHBOARD
+========================================================================== */
+
+/* 🎯 Will-Change para elementos específicos do dashboard */
+.kpi-card,
+.activity-card,
+.chart-container,
+.modal-overlay,
+.sidebar-nav a,
+.dropdown-menu,
+.filter-btn {
+  will-change: transform, opacity;
+}
+
+/* Remove will-change após hover */
+.kpi-card:hover,
+.activity-card:hover,
+.sidebar-nav a:hover {
+  will-change: auto;
+}
+
+/* 💻 Fallback para low-performance no dashboard */
+.low-performance .kpi-card,
+.low-performance .activity-card,
+.low-performance .chart-container,
+.low-performance .dropdown-menu,
+.low-performance .modal-overlay {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Substitui vidro por fundo sólido */
+.low-performance[data-theme="light"] .kpi-card,
+.low-performance[data-theme="light"] .activity-card {
+  background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.low-performance[data-theme="dark"] .kpi-card,
+.low-performance[data-theme="dark"] .activity-card {
+  background: rgba(30, 41, 59, 0.98) !important;
+}
+
+/* Reduz animações complexas */
+.low-performance .chart-container canvas {
+  animation: none !important;
+}
+

@@ -142,16 +142,18 @@ Versão: Apple Physics (Clean Grey Borders - FIXED)
     padding-right: 40px;
   }
 
-  /* --- ESTADO DE FOCO (CLEAN GREY) - FIXED V2 --- */
+  /* --- ESTADO DE FOCO (CLEAN GREY + LEVITAÇÃO) --- */
 .input-wrapper input:focus,
 .input-wrapper select:focus {
   background: var(--bg-input-focus);
+  /* 🎯 Borda original */
   border-color: #cbd5e1;
-  /* 🔧 FIX: Sombra sutil ao invés de levitação */
+  /* 💫 Sombra original */
   box-shadow: 0 0 0 3px rgba(203, 213, 225, 0.15);
   outline: none;
-  /* 🚀 CRITICAL FIX: Impede a levitação do global.css */
-  transform: none !important;
+  /* ✨ Levitação suave para feedback */
+  transform: translateY(-1px) !important;
+  transition: all 0.3s var(--ease-spring);
 }
 
 /* Dark Mode Focus */
@@ -159,14 +161,23 @@ Versão: Apple Physics (Clean Grey Borders - FIXED)
 [data-theme="dark"] .input-wrapper select:focus {
   border-color: rgba(255,255,255, 0.3);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
-  transform: none !important;
+  transform: translateY(-1px) !important;
 }
 
-  /* Ícone escurece no foco */
-  .input-wrapper input:focus + i,
-  .input-wrapper select:focus + i {
-    color: var(--text-main);
-  }
+/* 🔒 FIX: Impede duplicação de borda do global.css */
+.login-page .input-wrapper:focus-within {
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* Ícone escurece no foco */
+.input-wrapper input:focus + i,
+.input-wrapper select:focus + i {
+  color: var(--text-main);
+}
+
 
   /* --------------------------------------------------------------------------
   6. AÇÕES & BOTÕES
@@ -311,3 +322,46 @@ Versão: Apple Physics (Clean Grey Borders - FIXED)
     .form-row { grid-template-columns: 1fr; gap: 0; }
     .login-header h2 { font-size: 1.5rem; }
   }
+
+  /* ==========================================================================
+OTIMIZAÇÃO DE PERFORMANCE - LOGIN
+========================================================================== */
+
+/* 🎯 Will-Change para elementos do login */
+.login-card,
+.input-wrapper input,
+.input-wrapper select,
+.btn-full,
+.back-link {
+  will-change: transform, opacity;
+}
+
+/* Remove will-change após hover */
+.btn-full:hover,
+.back-link:hover {
+  will-change: auto;
+}
+
+/* 💻 Fallback para low-performance no login */
+.low-performance .login-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.low-performance[data-theme="dark"] .login-card {
+  background: rgba(30, 41, 59, 0.98) !important;
+}
+
+/* Desabilita animações de entrada em low-mode */
+.low-performance .login-card {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.low-performance .login-header img {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
