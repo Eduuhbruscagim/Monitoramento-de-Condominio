@@ -1,68 +1,46 @@
 /* ==========================================================================
    LOGIN.CSS - ESTILO GLOBAL DE AUTENTICAÇÃO
-   Versão: Apple Physics (Clean & Smooth)
+   Versão: Apple Physics (Clean Grey Borders)
    ========================================================================== */
 
-/* --------------------------------------------------------------------------
-   1. VARIÁVEIS LOCAIS (Para garantir a física mesmo se o global falhar)
-   -------------------------------------------------------------------------- */
-   :root {
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
-
-    --glass-bg: rgba(255, 255, 255, 0.65);
-    --glass-border: rgba(255, 255, 255, 0.8);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-
-    --radius: 24px;
-
-    /* A FÍSICA APPLE (Hardcoded para garantir) */
-    --ease-spring: cubic-bezier(0.19, 1, 0.22, 1);
-    --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
-}
+/* NOTA: Puxando variáveis do src/global.css, mas com bordas "Clean" locais */
 
 /* --------------------------------------------------------------------------
    2. ESTRUTURA DA PÁGINA
    -------------------------------------------------------------------------- */
-.login-page {
+   .login-page {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background: radial-gradient(circle at 0% 0%, #eef2ff 0%, #e0e7ff 50%, #f3f4f6 100%);
-    background-attachment: fixed;
-    background-size: cover;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
     padding: 20px;
-    color: #1e293b;
+    color: var(--text-main);
+    /* Background agora vem do body no global.css */
 }
 
 /* --------------------------------------------------------------------------
-   3. O CARD DE VIDRO (Com Entrada Elástica)
+   3. O CARD DE VIDRO
    -------------------------------------------------------------------------- */
 .login-card {
-    background: var(--glass-bg);
+    background: var(--bg-card);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-glass);
     padding: 48px 40px;
     border-radius: var(--radius);
     width: 100%;
     max-width: 500px;
     text-align: center;
-    box-shadow: var(--glass-shadow);
+    box-shadow: var(--shadow-glass);
 
-    /* Mola Suave na Entrada */
     opacity: 0;
     transform: translateY(30px) scale(0.96);
     animation: loginEnter 0.8s var(--ease-spring) forwards;
 }
 
 @keyframes loginEnter {
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* --------------------------------------------------------------------------
@@ -76,7 +54,6 @@
     height: 56px;
     margin-bottom: 20px;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
-    /* Animaçãozinha extra no logo */
     animation: floatLogo 1s var(--ease-spring) 0.1s forwards;
     opacity: 0;
     transform: translateY(10px);
@@ -87,7 +64,7 @@
 }
 
 .login-header h2 {
-    color: #0f172a;
+    color: var(--text-main);
     font-size: 1.75rem;
     margin-bottom: 8px;
     font-weight: 800;
@@ -95,13 +72,13 @@
 }
 
 .login-header p {
-    color: #64748b;
+    color: var(--text-secondary);
     font-size: 0.95rem;
     font-weight: 500;
 }
 
 /* --------------------------------------------------------------------------
-   5. FORMULÁRIO (Inputs Limpos - SEM BORDA AZUL)
+   5. FORMULÁRIO (Inputs Clean & Arredondados)
    -------------------------------------------------------------------------- */
 .input-group {
     margin-bottom: 24px;
@@ -112,7 +89,7 @@
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #334155;
+    color: var(--text-main);
     font-size: 0.85rem;
     margin-left: 4px;
 }
@@ -126,7 +103,7 @@
     left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-size: 1.1rem;
     transition: color 0.2s ease;
     z-index: 10;
@@ -138,19 +115,34 @@
 .input-wrapper select {
     width: 100%;
     padding: 14px 14px 14px 48px;
-    background: rgba(255, 255, 255, 0.5);
+
+    /* Background Global (Vidro/Branco/Dark) */
+    background: var(--bg-input);
+
+    /* RESTAURADO: A cor cinza exata que você gostou (#e2e8f0) */
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
+
+    /* FIX: Curvas forçadas */
+    border-radius: 12px !important;
+
     font-size: 1rem;
-    outline: none; /* Remove borda nativa */
-    color: #1e293b;
+    outline: none !important;
+    color: var(--text-main);
     font-family: 'Plus Jakarta Sans', sans-serif;
 
-    /* A Mágica: Transição apenas de movimento e cor de fundo */
+    /* Transição suave */
     transition:
         transform 0.2s var(--ease-snappy),
         background-color 0.2s ease,
         border-color 0.2s ease;
+}
+
+/* Ajuste específico para Dark Mode:
+   Borda #e2e8f0 fica muito brilhante no escuro.
+   Aqui eu troco suavemente para um cinza escuro se o tema for dark. */
+[data-theme="dark"] .input-wrapper input,
+[data-theme="dark"] .input-wrapper select {
+    border-color: rgba(255,255,255, 0.15);
 }
 
 .input-wrapper select {
@@ -164,26 +156,37 @@
     padding-right: 40px;
 }
 
-/* --- ESTADO DE FOCO (CLEAN) --- */
+/* --- ESTADO DE FOCO (CLEAN GREY) --- */
 .input-wrapper input:focus,
 .input-wrapper select:focus {
-    background: #fff; /* Fica branco sólido */
-    /* SEM BORDA AZUL: Mantém a borda cinza suave ou transparente */
-    border-color: #cbd5e1;
-    box-shadow: none; /* Remove qualquer brilho */
+    background: var(--bg-input-focus);
 
-    /* Ação Física: Levita 2 pixels */
+    /* RESTAURADO: Cinza um pouco mais escuro (#cbd5e1) no lugar do Azul */
+    border-color: #cbd5e1 !important;
+
+    /* FIX: Sem sombra azul, sem outline quadrado */
+    box-shadow: none;
+    outline: none !important;
+    border-radius: 12px !important;
+
+    /* Ação Física: Levita levemente */
     transform: translateY(-2px);
 }
 
-/* Ícone escurece um pouco no foco, mas sem ficar azulão */
+/* Ajuste de Foco no Dark Mode */
+[data-theme="dark"] .input-wrapper input:focus,
+[data-theme="dark"] .input-wrapper select:focus {
+    border-color: rgba(255,255,255, 0.3) !important;
+}
+
+/* Ícone escurece no foco */
 .input-wrapper input:focus+i,
 .input-wrapper select:focus+i {
-    color: #475569;
+    color: var(--text-main);
 }
 
 /* --------------------------------------------------------------------------
-   6. AÇÕES & BOTÕES (Com Peso)
+   6. AÇÕES & BOTÕES
    -------------------------------------------------------------------------- */
 .actions {
     display: flex;
@@ -198,7 +201,7 @@
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    color: #64748b;
+    color: var(--text-secondary);
     font-weight: 500;
     transition: transform 0.1s;
 }
@@ -212,10 +215,9 @@
 }
 .forgot-pass:hover { color: var(--primary-hover); }
 
-/* BOTÃO PRINCIPAL (COM SNAP) */
+/* BOTÃO PRINCIPAL */
 .btn-full {
     width: 100%;
-    border: none;
     padding: 14px;
     border-radius: 12px;
     font-size: 1rem;
@@ -224,11 +226,12 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    border: none;
+
     background: var(--primary);
-    color: white;
+    color: #ffffff;
     box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
 
-    /* Física Snappy */
     transition:
         transform 0.1s var(--ease-snappy),
         background-color 0.2s ease,
@@ -242,7 +245,7 @@
 }
 
 .btn-full:active {
-    transform: scale(0.96); /* Encolhe no clique (Feedback Tátil) */
+    transform: scale(0.96);
 }
 
 /* --------------------------------------------------------------------------
@@ -251,7 +254,7 @@
 .register-link {
     margin-top: 24px;
     font-size: 0.9rem;
-    color: #64748b;
+    color: var(--text-secondary);
     font-weight: 500;
 }
 .register-link a {
@@ -267,7 +270,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
@@ -276,12 +279,12 @@
     transition: all 0.2s ease;
 }
 .back-link:hover {
-    color: #1e293b;
-    background: rgba(255, 255, 255, 0.5);
+    color: var(--text-main);
+    background: var(--bg-input);
     transform: translateX(-2px);
 }
 
-/* Status Messages (Pop Animation) */
+/* Status Messages */
 .status-msg {
     display: none;
     padding: 12px;
@@ -299,14 +302,14 @@
 }
 
 .status-msg.error {
-    background: rgba(254, 226, 226, 0.8);
-    color: #b91c1c;
-    border: 1px solid #fecaca;
+    background: var(--error-bg);
+    color: var(--error-text);
+    border: 1px solid var(--error-bg);
 }
 .status-msg.success {
-    background: rgba(220, 252, 231, 0.8);
-    color: #15803d;
-    border: 1px solid #bbf7d0;
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid var(--success-bg);
 }
 
 /* Mobile Fixes */
@@ -315,5 +318,4 @@
     .login-card { padding: 32px 20px; }
     .form-row { grid-template-columns: 1fr; gap: 0; }
     .login-header h2 { font-size: 1.5rem; }
-    .input-wrapper input, .input-wrapper select { font-size: 16px !important; }
 }

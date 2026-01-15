@@ -1666,6 +1666,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     ModalUX.open(UIReserva.modal);
   };
 
+  window.abrirModalExtrato = () => {
+    // Usa o cache se tiver
+    if (State.caixaCache && State.caixaCache.length > 0) {
+        UICaixa.renderizarLista(State.caixaCache);
+    } else {
+        UICaixa.carregarExtrato();
+    }
+    ModalUX.open(UICaixa.modalHistorico);
+};  
+
   window.deletarReserva = (id) => {
     State.reservaParaDeletar = id;
     ModalUX.open(UIReserva.modalDelete);

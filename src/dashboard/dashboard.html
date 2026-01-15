@@ -87,7 +87,6 @@
           </a>
 
           <div class="user-profile-mini">
-            <!-- A imagem será injetada via JS, mas deixamos um fallback -->
             <img src="" alt="Avatar" class="avatar-circle-img" id="user-avatar-img" style="display: none;">
             <div class="avatar-circle" id="user-avatar">?</div>
 
@@ -146,27 +145,26 @@
 
         <div id="view-dashboard" class="view-section active">
           <section class="stats-grid">
-            <div class="stat-card stat-card-kpi">
-              <button
-                type="button"
-                class="kpi-plus"
-                id="btn-ver-caixa"
-                title="Ver movimentações"
-                aria-label="Ver movimentações"
-              >
-                <i class="fa-regular fa-eye"></i>
-              </button>
 
-              <button
-                type="button"
-                class="kpi-plus"
-                id="btn-ajustar-caixa"
-                title="Ajustar caixa"
-                style="display: none"
-                aria-label="Ajustar caixa"
-              >
-                <i class="fa-solid fa-plus"></i>
-              </button>
+            <div class="stat-card stat-card-kpi">
+              <div class="kpi-actions-wrapper">
+                <button
+                  class="kpi-eye"
+                  onclick="abrirModalExtrato()"
+                  title="Ver Extrato"
+                >
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+
+                <button
+                  class="kpi-plus action-btn-admin"
+                  onclick="abrirModalCaixa()"
+                  title="Ajustar caixa"
+                  id="btn-ajustar-caixa"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
 
               <div class="icon-box blue">
                 <i class="fa-solid fa-wallet"></i>
@@ -328,6 +326,7 @@
               </div>
               <h3>Quadra</h3>
               <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px">
+                Capacidade: 16 pessoas<br>
                 Para esportes e lazer
               </p>
               <button
@@ -360,7 +359,6 @@
       </main>
     </div>
 
-    <!-- MODAL DE CONFIGURAÇÕES (NOVO) -->
     <div id="modal-configuracoes" class="modal-overlay">
       <div class="modal-glass" style="max-width: 500px">
         <div class="modal-header">
@@ -370,18 +368,15 @@
           </button>
         </div>
 
-        <!-- Abas de Navegação -->
         <div class="tabs-header">
           <button class="tab-btn active" data-tab="tab-perfil">Meu Perfil</button>
           <button class="tab-btn" data-tab="tab-seguranca">Segurança</button>
         </div>
 
         <div class="tabs-content">
-          <!-- ABA PERFIL -->
           <div id="tab-perfil" class="tab-pane active">
             <form id="form-config-perfil">
 
-              <!-- Foto de Perfil (Visualização + Edição via URL por enquanto) -->
               <div class="profile-edit-header" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
                 <img src="" id="cfg-preview-img" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px;">
                 <div class="input-wrapper" style="width: 100%;">
@@ -441,7 +436,6 @@
             </form>
           </div>
 
-          <!-- ABA SEGURANÇA -->
           <div id="tab-seguranca" class="tab-pane">
             <form id="form-config-senha" style="margin-bottom: 30px;">
               <h4 style="margin-bottom: 15px; color: #0f172a;">Trocar Senha</h4>
@@ -474,7 +468,6 @@
                 <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">
                     Se notar atividade suspeita, encerre todas as outras sessões imediatamente.
                 </p>
-                <!-- Botão funcional via API do Supabase -->
                 <button type="button" id="btn-logout-others" class="btn btn-outline btn-full" style="color: #64748b; border-color: #cbd5e1;">
                     <i class="fa-solid fa-mobile-screen-button" style="margin-right: 8px;"></i>
                     Sair de outros dispositivos

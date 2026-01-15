@@ -7,41 +7,22 @@
      sincronizada com a Landing Page.
    ========================================================================== */
 
-   :root {
-    --primary: #2563eb;
-    --dark: #0f172a;
-    --text: #64748b;
-    --radius: 24px;
+/* NOTA: Variáveis (:root) removidas. Agora usamos o src/global.css como fonte da verdade. */
 
-    /* Base Glass Variables (para cards) */
-    --glass-bg: rgba(255, 255, 255, 0.45);
-    --glass-border: rgba(255, 255, 255, 0.9);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-}
-
-/* OTIMIZAÇÃO DE GPU: Fundo Fixo via Pseudo-Elemento */
+/* OTIMIZAÇÃO DE GPU: Fundo Fixo */
 body.about-page {
+    /* Mantém resets específicos que você tinha */
     font-family: 'Plus Jakarta Sans', sans-serif !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow-x: hidden;
-    color: var(--dark);
-    background-color: #f3f4f6;
-    position: relative;
-}
 
-/* Isso cria o fundo fixo SEM travar o scroll */
-body.about-page::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at 0% 0%, #eef2ff 0%, #e0e7ff 50%, #f3f4f6 100%);
-    background-size: cover;
-    z-index: -1;
-    will-change: transform;
+    /* Cores agora vêm do Global */
+    color: var(--text-main);
+
+    /* CRÍTICO: Não definimos background aqui.
+       Assim, ele herda o gradiente e o fixed-attachment do 'body' no global.css */
+    position: relative;
 }
 
 /* --------------------------------------------------------------------------
@@ -61,22 +42,21 @@ body.about-page::before {
     align-items: center;
     padding: 12px 24px !important;
 
-    /* === O SEGREDO DO "GELO FOSCO" (Copiado do Index) === */
+    /* === O SEGREDO DO "GELO FOSCO" (Puxando do Global v2.1) === */
+    /* Agora usa 0.35 de opacidade para ficar bem translúcido */
+    background: var(--bg-glass-nav) !important;
 
-    /* 1. Transparência agressiva para o fundo vazar */
-    background: rgba(255, 255, 255, 0.35) !important;
-
-    /* 2. Blur Pesado e Saturação para o efeito "Box de Banheiro" */
+    /* Blur Pesado e Saturação */
     backdrop-filter: saturate(200%) blur(40px);
     -webkit-backdrop-filter: saturate(200%) blur(40px);
 
-    /* 3. Borda mais forte para compensar a transparência */
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    /* Borda adaptativa */
+    border: 1px solid var(--border-glass);
 
-    /* 4. Sombra Profunda + Brilho Interno */
+    /* Sombra Profunda + Brilho Interno */
     box-shadow:
-        0 20px 40px -10px rgba(0, 0, 0, 0.1),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+        var(--shadow-glass),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 
     border-radius: 100px;
     z-index: 1000;
@@ -84,7 +64,7 @@ body.about-page::before {
 }
 
 .nav-logo {
-    height: 40px; /* Ajustado para bater com o index (era 32px) */
+    height: 40px;
     width: auto;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
 }
@@ -92,7 +72,7 @@ body.about-page::before {
 /* Botão Voltar Estilizado */
 .back-btn {
     text-decoration: none !important;
-    color: var(--text) !important;
+    color: var(--text-secondary) !important;
     font-weight: 600;
     font-size: 0.95rem;
     display: flex;
@@ -107,7 +87,7 @@ body.about-page::before {
 
 .back-btn:hover {
     color: var(--primary) !important;
-    background: rgba(255, 255, 255, 0.4) !important; /* Feedback de hover sutil */
+    background: var(--bg-input) !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -115,7 +95,7 @@ body.about-page::before {
    -------------------------------------------------------------------------- */
 .about-hero {
     position: relative !important;
-    margin: 180px auto 100px !important; /* Padding top aumentado por causa da dock */
+    margin: 180px auto 100px !important;
     padding: 0 20px !important;
     max-width: 1000px;
     text-align: center;
@@ -148,12 +128,12 @@ body.about-page::before {
     font-weight: 800;
     letter-spacing: -0.04em;
     margin-bottom: 30px;
-    color: var(--dark);
+    color: var(--text-main);
 }
 
 .about-hero p {
     font-size: 1.4rem;
-    color: var(--text);
+    color: var(--text-secondary);
     line-height: 1.6;
     max-width: 700px;
     margin: 0 auto 60px;
@@ -173,7 +153,7 @@ body.about-page::before {
     font-size: 2.5rem;
     margin-bottom: 60px;
     letter-spacing: -0.03em;
-    color: var(--dark);
+    color: var(--text-main);
 }
 
 .values-grid {
@@ -184,21 +164,21 @@ body.about-page::before {
 
 /* Card de Valor (Hard Glass) */
 .value-card {
-    background: var(--glass-bg);
+    background: var(--bg-card); /* 0.45 Opacity - Vidro Leve */
     backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-glass);
 
     padding: 40px;
     border-radius: 24px;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: var(--glass-shadow);
+    box-shadow: var(--shadow-glass);
 }
 
 .value-card:hover {
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--bg-input-focus);
     transform: translateY(-10px);
     box-shadow: 0 20px 40px -5px rgba(37, 99, 235, 0.1);
-    border-color: #fff;
+    border-color: var(--border-glass);
 }
 
 .icon-box {
@@ -212,6 +192,7 @@ body.about-page::before {
     margin-bottom: 24px;
 }
 
+/* Cores Utilitárias */
 .blue { background: #eff6ff; color: var(--primary); }
 .purple { background: #f3e8ff; color: #9333ea; }
 .green { background: #dcfce7; color: #16a34a; }
@@ -220,11 +201,11 @@ body.about-page::before {
     font-size: 1.25rem;
     margin-bottom: 12px;
     font-weight: 700;
-    color: var(--dark);
+    color: var(--text-main);
 }
 
 .value-card p {
-    color: var(--text);
+    color: var(--text-secondary);
     line-height: 1.6;
     font-size: 1rem;
 }
@@ -247,12 +228,12 @@ body.about-page::before {
     font-size: 3rem;
     margin-bottom: 10px;
     letter-spacing: -0.03em;
-    color: var(--dark);
+    color: var(--text-main);
 }
 
 .team-header p {
     font-size: 1.2rem;
-    color: var(--text);
+    color: var(--text-secondary);
 }
 
 .team-grid {
@@ -262,18 +243,18 @@ body.about-page::before {
     flex-wrap: wrap;
 }
 
-/* Card do Membro (Hard Glass Adaptation) */
+/* Card do Membro */
 .member-card {
-    background: var(--glass-bg);
+    background: var(--bg-card);
     backdrop-filter: blur(20px) saturate(160%);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-glass);
 
     border-radius: 24px;
     padding: 20px;
     width: 280px;
 
-    box-shadow: var(--glass-shadow);
+    box-shadow: var(--shadow-glass);
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
         box-shadow 0.3s ease,
         background-color 0.3s ease;
@@ -283,7 +264,7 @@ body.about-page::before {
 
 .member-card:hover {
     transform: translateY(-8px);
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--bg-input-focus);
     box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.1);
 }
 
@@ -294,7 +275,7 @@ body.about-page::before {
     border-radius: 20px;
     overflow: hidden;
     margin-bottom: 20px;
-    background: #f1f5f9;
+    background: var(--bg-input);
 }
 
 .member-photo img {
@@ -313,7 +294,7 @@ body.about-page::before {
 .member-card h3 {
     font-size: 1.2rem;
     margin-bottom: 5px;
-    color: var(--dark);
+    color: var(--text-main);
     font-weight: 700;
 }
 
@@ -332,13 +313,13 @@ body.about-page::before {
 }
 
 .social-links a {
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-size: 1.2rem;
     transition: 0.2s;
 }
 
 .social-links a:hover {
-    color: var(--dark);
+    color: var(--text-main);
     transform: scale(1.1);
 }
 
@@ -348,9 +329,9 @@ body.about-page::before {
 .simple-footer {
     text-align: center;
     padding: 40px;
-    color: var(--text);
+    color: var(--text-secondary);
     font-size: 0.9rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    border-top: 1px solid var(--border-glass);
     margin-top: 50px;
 }
 
@@ -359,13 +340,11 @@ body.about-page::before {
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
     .about-hero {
-        margin-top: 140px !important; /* Ajuste para não bater na dock */
+        margin-top: 140px !important;
     }
-
     .about-hero h1 {
         font-size: 2.5rem;
     }
-
     .values-grid,
     .team-grid {
         justify-content: center;

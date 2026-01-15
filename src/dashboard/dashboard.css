@@ -385,6 +385,8 @@ body.modal-open {
     transform 0.3s var(--ease-spring),
     box-shadow 0.3s var(--ease-spring),
     background-color 0.3s var(--ease-flow);
+
+  position: relative; /* Necessário para os botões absolutos */
 }
 
 .stat-card:hover {
@@ -456,6 +458,26 @@ body.modal-open {
   color: #64748b;
 }
 
+/* --- KPI ACTION BUTTONS (FIXED) --- */
+
+/* Wrapper que segura os botões lado a lado */
+.kpi-actions-wrapper {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+/* Quando dentro do wrapper, remove o absolute para obedecer o flexbox */
+.kpi-actions-wrapper .kpi-plus,
+.kpi-actions-wrapper .kpi-eye {
+  position: static;
+  transform: none;
+}
+
+/* Estilo do Botão Mais (Padrão) */
 .kpi-plus {
   width: 34px;
   height: 34px;
@@ -472,18 +494,35 @@ body.modal-open {
   /* Transição herdada do global.css */
 }
 
-.kpi-plus:hover {
+/* Estilo do Botão Olho (Gêmeo do Mais - AZUL!) */
+.kpi-eye {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(226, 232, 240, 1);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #2563eb; /* Azul igual ao plus */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.kpi-plus:hover, .kpi-eye:hover {
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 10px 18px rgba(37, 99, 235, 0.15);
 }
 
-/* Só nos cards ele fica “no canto” */
+/* Só nos cards ele fica “no canto” (se não estiver no wrapper) */
 .stat-card-kpi {
   position: relative;
 }
 
-.stat-card-kpi .kpi-plus {
+/* Mantém o comportamento antigo para botões fora do wrapper */
+.stat-card-kpi > .kpi-plus {
   position: absolute;
   top: 16px;
   right: 16px;
@@ -604,7 +643,7 @@ body.modal-open {
   padding: 16px;
   color: #1e293b;
   font-size: 0.95rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   vertical-align: top;
 }
 
@@ -908,6 +947,7 @@ body.modal-open {
     font-weight: 400;
   }
 
+
   /* Destaque Data (Primeira linha de cada card) */
   .tabela-moradores td:first-child,
   .tabela-ocorrencias td:first-child,
@@ -1010,6 +1050,18 @@ body.modal-open {
   .tabela-caixa-extrato td:nth-child(4)::before {
     content: "Descrição : ";
   }
+
+  /* LINHAS ENTRE OS CAMPOS DO EXTRATO NO MOBILE */
+.tabela-caixa-extrato td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 12px !important;
+}
+
+.tabela-caixa-extrato td:last-child {
+  border-bottom: none !important;
+}
+
 
   /* Ajuste de alinhamento para Descrição no Extrato do Caixa */
   .tabela-caixa-extrato td:nth-child(4) {
@@ -1202,25 +1254,55 @@ body.modal-open {
   }
 }
 
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+}
+
 @media (max-width: 480px) {
-  .modal-glass {
-    padding: 24px;
-    width: 95%;
-  }
-  .form-row {
-    flex-direction: column;
-    gap: 0;
-  }
-  .modal-header h3 {
-    font-size: 1.2rem;
+  .modal-glass { padding: 24px; width: 95%; }
+  .form-row { flex-direction: column; gap: 0; }
+
+  /* Botões Empilhados */
+  .modal-footer {
+    display: flex;
+    flex-direction: column; /* FORÇA EMPILHAMENTO */
+    width: 100%;
+    gap: 12px;
+    margin-top: 20px;
   }
 
-  /* FIX: Botões lado a lado e centralizados */
+  /* Target especificamente a div de botões dos modais de confirmação
+     para garantir que ela obedeça, pois no HTML ela tem style inline */
+  #modal-confirm-delete .modal-glass > div:last-child,
+  #modal-confirm-delete-reserva .modal-glass > div:last-child,
+  #modal-confirm-delete-ocorrencia .modal-glass > div:last-child {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  /* Botões Full Width */
+  .modal-footer .btn,
+  #modal-confirm-delete button,
+  #modal-confirm-delete-reserva button,
+  #modal-confirm-delete-ocorrencia button {
+    width: 100% !important;
+    margin: 0 !important;
+    justify-content: center !important;
+    padding: 14px !important;
+  }
+}
+
+  /* Forçar os modais de confirmação a obedecerem o empilhamento */
   #modal-confirm-delete div[style*="display:flex"],
   #modal-confirm-delete-reserva div[style*="display:flex"],
   #modal-confirm-delete-ocorrencia div[style*="display:flex"] {
     display: flex !important;
-    flex-direction: row !important;
+    flex-direction: column !important; /* MUDANÇA AQUI: de row para column */
     gap: 12px !important;
     width: 100% !important;
     justify-content: center !important;
@@ -1238,6 +1320,7 @@ body.modal-open {
     align-items: center !important;
     justify-content: center !important;
     margin: 0 !important;
+    width: 100% !important; /* Garante full width */
   }
 
   #modal-confirm-delete button.btn-outline,
@@ -1255,7 +1338,6 @@ body.modal-open {
     border: none !important;
     color: white !important;
   }
-}
 
 /* --------------------------------------------------------------------------
   10. TOAST PREMIUM

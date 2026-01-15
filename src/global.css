@@ -1,32 +1,78 @@
+/* ==========================================================================
+   SRC/GLOBAL.CSS - SINGLE SOURCE OF TRUTH
+   Versão: 2.1 (Glassmorphism Extreme Restored)
+   ========================================================================== */
+
 /* --------------------------------------------------------------------------
    1. VARIÁVEIS & DESIGN TOKENS
    -------------------------------------------------------------------------- */
    :root {
-    /* Cores da Marca */
+    /* --- PALETA LÓGICA (LIGHT MODE DEFAULT) --- */
+    /* Gradiente original restaurado */
+    --bg-body: radial-gradient(circle at 50% 0%, #eef2ff 0%, #e0e7ff 50%, #f3f4f6 100%);
+
+    /* VIDRO AGRESSIVO (Restaurado para os valores originais) */
+    --bg-glass-nav: rgba(255, 255, 255, 0.35); /* "Absurd Translucency" da Dock */
+    --bg-card: rgba(255, 255, 255, 0.45);      /* Vidro dos Cards (Leve) */
+
+    /* Inputs precisam de um pouco mais de fundo para contraste de leitura */
+    --bg-input: rgba(255, 255, 255, 0.55);
+    --bg-input-focus: #ffffff;
+
+    --text-main: #0f172a;
+    --text-secondary: #64748b;
+    --text-inverse: #ffffff;
+
+    --border-glass: rgba(255, 255, 255, 0.8);
+    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+
     --primary: #2563eb;
     --primary-hover: #1d4ed8;
     --secondary: #06b6d4;
 
-    /* Paleta Neutra */
-    --dark: #0f172a;
-    --text-main: #374151;
-    --text-light: #6b7280;
-    --bg-light: #f9fafb;
-    --white: #ffffff;
+    /* Status Colors */
+    --success-bg: rgba(34, 197, 94, 0.1);
+    --success-text: #15803d;
+    --error-bg: rgba(239, 68, 68, 0.1);
+    --error-text: #b91c1c;
 
-    /* Efeitos & Formas (Mantendo as suas originais) */
-    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --radius: 12px;
+    /* --- FÍSICA & FORMA --- */
+    --radius: 24px;
+    --radius-sm: 12px;
 
-    /* --- APPLE PHYSICS ENGINE (Adicionado) --- */
-    /* MOLA SUAVE (Para Modais e Telas) */
+    /* Apple Physics Engine */
     --ease-spring: cubic-bezier(0.19, 1, 0.22, 1);
-
-    /* SNAP TÁTIL (Para Botões e Interações Rápidas) */
     --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
-
-    /* FLUIDEZ (Para mudanças de cor/opacidade) */
     --ease-flow: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- DARK MODE OVERRIDES (Ajustado para não perder o vidro) --- */
+[data-theme="dark"] {
+    --bg-body: radial-gradient(circle at 50% 0%, #0f172a 0%, #1e293b 50%, #020617 100%);
+
+    /* No Dark Mode, se ficar muito transparente (0.35), o texto fica ruim de ler.
+       Ajustei para 0.45/0.50 que é o limite do legível mantendo o vidro. */
+    --bg-glass-nav: rgba(15, 23, 42, 0.45);
+    --bg-card: rgba(30, 41, 59, 0.50);
+
+    --bg-input: rgba(15, 23, 42, 0.60);
+    --bg-input-focus: rgba(30, 41, 59, 0.9);
+
+    --text-main: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-inverse: #0f172a;
+
+    --border-glass: rgba(255, 255, 255, 0.1); /* Borda sutil branca */
+    --shadow-glass: 0 10px 40px -10px rgba(0, 0, 0, 0.5); /* Sombra preta forte */
+
+    --primary: #3b82f6;
+    --primary-hover: #60a5fa;
+
+    /* Status Colors (Dark) */
+    --success-bg: rgba(34, 197, 94, 0.2);
+    --success-text: #4ade80;
+    --error-bg: rgba(239, 68, 68, 0.2);
+    --error-text: #f87171;
 }
 
 /* --------------------------------------------------------------------------
@@ -40,7 +86,6 @@
     -webkit-font-smoothing: antialiased;
 }
 
-/* --- SCROLLBAR INVISÍVEL --- */
 html {
     scroll-behavior: smooth;
     scrollbar-width: none;
@@ -52,10 +97,15 @@ html {
 }
 
 body {
+    background: var(--bg-body);
+    background-attachment: fixed;
+    background-size: cover;
     color: var(--text-main);
-    background-color: var(--white);
+    min-height: 100vh;
     line-height: 1.6;
     overflow-x: hidden;
+    /* Transição suave ao trocar de tema */
+    transition: background 0.5s var(--ease-flow), color 0.3s ease;
 }
 
 /* --------------------------------------------------------------------------
@@ -67,44 +117,33 @@ body {
     padding: 0 20px;
 }
 
+/* Classes Utilitárias de Texto */
+.text-main { color: var(--text-main) !important; }
+.text-sec { color: var(--text-secondary) !important; }
+
 /* --------------------------------------------------------------------------
-   4. FÍSICA INTERATIVA GLOBAL (CLEAN)
+   4. FÍSICA INTERATIVA GLOBAL
    -------------------------------------------------------------------------- */
-
-/* --- BOTÕES E LINKS (Com Peso Físico) --- */
-/* Aplica a física suave, mas mantendo o visual original */
-button, .btn, .action-btn, .kpi-plus, .icon-btn, .btn-settings, a.menu-item {
-    transition:
-        transform 0.1s var(--ease-snappy),
-        background-color 0.2s var(--ease-flow),
-        box-shadow 0.2s var(--ease-flow),
-        color 0.2s linear;
-
+button, .btn, .action-btn, .kpi-plus, .icon-btn, .btn-settings, a.menu-item,
+input, select, textarea, .glass-select, .input-wrapper, .card-glass, .btn-icon-glass {
+    transition: all 0.2s var(--ease-snappy);
     outline: none;
     -webkit-tap-highlight-color: transparent;
-    cursor: pointer;
 }
 
-/* O SEGREDO TÁTIL: Encolher ao clicar (Feedback Físico sem mudar cor) */
-button:active, .btn:active, .action-btn:active, .icon-btn:active, a.menu-item:active {
+/* Feedback Tátil Global (Encolher ao clicar) */
+button:active, .btn:active, .action-btn:active, .icon-btn:active, a.menu-item:active, .btn-icon-glass:active {
     transform: scale(0.96) !important;
 }
 
-/* --- INPUTS & SELECTS (Levitação Sutil) --- */
-input, select, textarea, .glass-select, .input-wrapper {
-    /* Transição apenas de movimento e cor de fundo */
-    transition:
-        transform 0.2s var(--ease-snappy),
-        background-color 0.2s var(--ease-flow);
-    outline: none;
-}
-
-/* Quando foca: APENAS LEVITA. Sem borda azul, sem brilho extra. */
+/* Inputs Focus Global */
 .input-wrapper:focus-within,
 input:focus,
 select:focus,
 textarea:focus {
     transform: translateY(-1px);
+    background-color: var(--bg-input-focus);
+    border-color: var(--border-glass);
 }
 
 /* --------------------------------------------------------------------------
@@ -119,19 +158,19 @@ textarea:focus {
     font-weight: 600;
     text-decoration: none;
     font-size: 0.95rem;
+    cursor: pointer;
+    border: 1px solid transparent;
 }
 
 .btn-primary {
     background-color: var(--primary);
-    color: var(--white);
-    /* Sombra original mantida */
+    color: #ffffff; /* Sempre branco no botão primário */
     box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
-    border: 1px solid transparent;
 }
 
 .btn-primary:hover {
     background-color: var(--primary-hover);
-    transform: translateY(-2px); /* Flutua no hover */
+    transform: translateY(-2px);
     box-shadow: 0 8px 15px rgba(37, 99, 235, 0.3);
 }
 
@@ -139,100 +178,57 @@ textarea:focus {
     background-color: transparent;
     border: 1px solid var(--primary);
     color: var(--primary);
-    margin-left: 10px;
 }
 
 .btn-outline:hover {
-    background-color: rgba(37, 99, 235, 0.05);
+    background-color: rgba(37, 99, 235, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Botão Redondo de Vidro (Para o Theme Switcher e Ações Rápidas) */
+.btn-icon-glass {
+    background: rgba(255, 255, 255, 0.15); /* Vidro sutil */
+    border: 1px solid var(--border-glass);
+    color: var(--text-main);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.btn-icon-glass:hover {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: transparent;
     transform: translateY(-2px);
 }
 
 /* --------------------------------------------------------------------------
-   6. HEADER & NAVEGAÇÃO
+   6. CLASSES PADRÃO DE VIDRO (Consistência Visual)
    -------------------------------------------------------------------------- */
-header {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-    z-index: 1000;
-    padding: 20px 0;
-    transition: all 0.3s ease;
-}
-
-header.scrolled {
-    background: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
-}
-
-.nav-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    transition: transform 0.2s var(--ease-snappy);
-}
-
-.logo:hover {
-    transform: scale(1.02);
-}
-
-.logo:active {
-    transform: scale(0.96);
-}
-
-.logo-img {
-    height: 60px;
-    width: auto;
-}
-
-nav ul {
-    display: flex;
-    gap: 32px;
-    list-style: none;
-    align-items: center;
-}
-
-nav a {
-    text-decoration: none;
-    color: var(--text-light);
-    font-weight: 600;
-    font-size: 0.95rem;
-    transition: color 0.2s var(--ease-flow);
-    position: relative;
-}
-
-nav a:hover {
-    color: var(--primary);
+.glass-panel {
+    background: var(--bg-card);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-glass);
+    border-radius: var(--radius);
 }
 
 /* --------------------------------------------------------------------------
-   7. MENU MOBILE & RODAPÉ
+   7. RODAPÉ & DEMAIS COMPONENTES
    -------------------------------------------------------------------------- */
-.mobile-toggle {
-    display: none;
-    font-size: 1.5rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--dark);
-    padding: 5px;
-}
-
 footer {
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    border-top: 1px solid var(--border-glass);
     padding: 30px 0;
-    background: var(--white);
+    background: var(--bg-card);
+    backdrop-filter: blur(10px);
     position: relative;
     z-index: 1;
 }
@@ -246,7 +242,7 @@ footer {
 .footer-links a {
     margin-left: 30px;
     text-decoration: none;
-    color: var(--text-light);
+    color: var(--text-secondary);
     font-weight: 500;
     transition: color 0.2s;
 }
@@ -255,47 +251,8 @@ footer {
     color: var(--primary);
 }
 
-/* --------------------------------------------------------------------------
-   8. RESPONSIVIDADE
-   -------------------------------------------------------------------------- */
+/* --- RESPONSIVIDADE BÁSICA --- */
 @media (max-width: 768px) {
-    .mobile-toggle {
-        display: block;
-    }
-
-    .nav-menu {
-        display: block;
-        position: fixed;
-        top: 90px;
-        left: -100%;
-        width: 100%;
-        height: calc(100vh - 90px);
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        padding: 40px;
-        transition: left 0.5s var(--ease-spring);
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .nav-menu.active {
-        left: 0;
-    }
-
-    .nav-menu ul {
-        flex-direction: column;
-        align-items: center;
-        gap: 30px;
-    }
-
-    .nav-menu a {
-        font-size: 1.25rem;
-    }
-
-    .btn-outline {
-        margin: 0;
-        margin-top: 10px;
-    }
-
     .footer-content {
         flex-direction: column;
         gap: 30px;
