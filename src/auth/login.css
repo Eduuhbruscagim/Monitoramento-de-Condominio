@@ -1,14 +1,12 @@
 /* ==========================================================================
-   LOGIN.CSS - ESTILO GLOBAL DE AUTENTICAÇÃO
-   Versão: Apple Physics (Clean Grey Borders)
-   ========================================================================== */
-
-/* NOTA: Puxando variáveis do src/global.css, mas com bordas "Clean" locais */
+LOGIN.CSS - ESTILO GLOBAL DE AUTENTICAÇÃO
+Versão: Apple Physics (Clean Grey Borders - FIXED)
+========================================================================== */
 
 /* --------------------------------------------------------------------------
-   2. ESTRUTURA DA PÁGINA
-   -------------------------------------------------------------------------- */
-   .login-page {
+2. ESTRUTURA DA PÁGINA
+-------------------------------------------------------------------------- */
+.login-page {
     font-family: 'Plus Jakarta Sans', sans-serif;
     display: flex;
     align-items: center;
@@ -16,13 +14,12 @@
     min-height: 100vh;
     padding: 20px;
     color: var(--text-main);
-    /* Background agora vem do body no global.css */
-}
+  }
 
-/* --------------------------------------------------------------------------
-   3. O CARD DE VIDRO
-   -------------------------------------------------------------------------- */
-.login-card {
+  /* --------------------------------------------------------------------------
+  3. O CARD DE VIDRO
+  -------------------------------------------------------------------------- */
+  .login-card {
     background: var(--bg-card);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -33,119 +30,108 @@
     max-width: 500px;
     text-align: center;
     box-shadow: var(--shadow-glass);
-
     opacity: 0;
     transform: translateY(30px) scale(0.96);
     animation: loginEnter 0.8s var(--ease-spring) forwards;
-}
+  }
 
-@keyframes loginEnter {
+  @keyframes loginEnter {
     to { opacity: 1; transform: translateY(0) scale(1); }
-}
+  }
 
-/* --------------------------------------------------------------------------
-   4. CABEÇALHO
-   -------------------------------------------------------------------------- */
-.login-header {
+  /* --------------------------------------------------------------------------
+  4. CABEÇALHO
+  -------------------------------------------------------------------------- */
+  .login-header {
     margin-bottom: 32px;
-}
+  }
 
-.login-header img {
+  .login-header img {
     height: 56px;
     margin-bottom: 20px;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
     animation: floatLogo 1s var(--ease-spring) 0.1s forwards;
     opacity: 0;
     transform: translateY(10px);
-}
+  }
 
-@keyframes floatLogo {
+  @keyframes floatLogo {
     to { opacity: 1; transform: translateY(0); }
-}
+  }
 
-.login-header h2 {
+  .login-header h2 {
     color: var(--text-main);
     font-size: 1.75rem;
     margin-bottom: 8px;
     font-weight: 800;
     letter-spacing: -0.03em;
-}
+  }
 
-.login-header p {
+  .login-header p {
     color: var(--text-secondary);
     font-size: 0.95rem;
     font-weight: 500;
-}
+  }
 
-/* --------------------------------------------------------------------------
-   5. FORMULÁRIO (Inputs Clean & Arredondados)
-   -------------------------------------------------------------------------- */
-.input-group {
+  /* --------------------------------------------------------------------------
+  5. FORMULÁRIO (Inputs Clean & Arredondados) - FIXED
+  -------------------------------------------------------------------------- */
+  .input-group {
     margin-bottom: 24px;
     text-align: left;
-}
+  }
 
-.input-group label {
+  .input-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
     color: var(--text-main);
     font-size: 0.85rem;
     margin-left: 4px;
-}
+  }
 
-.input-wrapper {
+  .input-wrapper {
     position: relative;
-}
+  }
 
-.input-wrapper i {
+  .input-wrapper i {
     position: absolute;
     left: 16px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-secondary);
     font-size: 1.1rem;
-    transition: color 0.2s ease;
+    transition: color 0.3s ease;
     z-index: 10;
     pointer-events: none;
-}
+  }
 
-/* INPUTS & SELECTS */
-.input-wrapper input,
-.input-wrapper select {
+  /* INPUTS & SELECTS */
+  .input-wrapper input,
+  .input-wrapper select {
     width: 100%;
     padding: 14px 14px 14px 48px;
-
-    /* Background Global (Vidro/Branco/Dark) */
     background: var(--bg-input);
-
-    /* RESTAURADO: A cor cinza exata que você gostou (#e2e8f0) */
     border: 1px solid #e2e8f0;
-
-    /* FIX: Curvas forçadas */
-    border-radius: 12px !important;
-
+    border-radius: 12px;
     font-size: 1rem;
-    outline: none !important;
+    outline: none;
     color: var(--text-main);
     font-family: 'Plus Jakarta Sans', sans-serif;
-
-    /* Transição suave */
+    /* 🔧 FIX: Transition suave SEM transform */
     transition:
-        transform 0.2s var(--ease-snappy),
-        background-color 0.2s ease,
-        border-color 0.2s ease;
-}
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
 
-/* Ajuste específico para Dark Mode:
-   Borda #e2e8f0 fica muito brilhante no escuro.
-   Aqui eu troco suavemente para um cinza escuro se o tema for dark. */
-[data-theme="dark"] .input-wrapper input,
-[data-theme="dark"] .input-wrapper select {
+  /* Dark Mode Border */
+  [data-theme="dark"] .input-wrapper input,
+  [data-theme="dark"] .input-wrapper select {
     border-color: rgba(255,255,255, 0.15);
-}
+  }
 
-.input-wrapper select {
+  .input-wrapper select {
     -webkit-appearance: none;
     appearance: none;
     cursor: pointer;
@@ -154,49 +140,46 @@
     background-position: right 16px center;
     background-size: 1em;
     padding-right: 40px;
-}
+  }
 
-/* --- ESTADO DE FOCO (CLEAN GREY) --- */
+  /* --- ESTADO DE FOCO (CLEAN GREY) - FIXED V2 --- */
 .input-wrapper input:focus,
 .input-wrapper select:focus {
-    background: var(--bg-input-focus);
-
-    /* RESTAURADO: Cinza um pouco mais escuro (#cbd5e1) no lugar do Azul */
-    border-color: #cbd5e1 !important;
-
-    /* FIX: Sem sombra azul, sem outline quadrado */
-    box-shadow: none;
-    outline: none !important;
-    border-radius: 12px !important;
-
-    /* Ação Física: Levita levemente */
-    transform: translateY(-2px);
+  background: var(--bg-input-focus);
+  border-color: #cbd5e1;
+  /* 🔧 FIX: Sombra sutil ao invés de levitação */
+  box-shadow: 0 0 0 3px rgba(203, 213, 225, 0.15);
+  outline: none;
+  /* 🚀 CRITICAL FIX: Impede a levitação do global.css */
+  transform: none !important;
 }
 
-/* Ajuste de Foco no Dark Mode */
+/* Dark Mode Focus */
 [data-theme="dark"] .input-wrapper input:focus,
 [data-theme="dark"] .input-wrapper select:focus {
-    border-color: rgba(255,255,255, 0.3) !important;
+  border-color: rgba(255,255,255, 0.3);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+  transform: none !important;
 }
 
-/* Ícone escurece no foco */
-.input-wrapper input:focus+i,
-.input-wrapper select:focus+i {
+  /* Ícone escurece no foco */
+  .input-wrapper input:focus + i,
+  .input-wrapper select:focus + i {
     color: var(--text-main);
-}
+  }
 
-/* --------------------------------------------------------------------------
-   6. AÇÕES & BOTÕES
-   -------------------------------------------------------------------------- */
-.actions {
+  /* --------------------------------------------------------------------------
+  6. AÇÕES & BOTÕES
+  -------------------------------------------------------------------------- */
+  .actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
     font-size: 0.9rem;
-}
+  }
 
-.remember-me {
+  .remember-me {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -204,19 +187,21 @@
     color: var(--text-secondary);
     font-weight: 500;
     transition: transform 0.1s;
-}
-.remember-me:active { transform: scale(0.98); }
+  }
 
-.forgot-pass {
+  .remember-me:active { transform: scale(0.98); }
+
+  .forgot-pass {
     color: var(--primary);
     text-decoration: none;
     font-weight: 600;
     transition: color 0.2s;
-}
-.forgot-pass:hover { color: var(--primary-hover); }
+  }
 
-/* BOTÃO PRINCIPAL */
-.btn-full {
+  .forgot-pass:hover { color: var(--primary-hover); }
+
+  /* BOTÃO PRINCIPAL */
+  .btn-full {
     width: 100%;
     padding: 14px;
     border-radius: 12px;
@@ -227,45 +212,45 @@
     align-items: center;
     cursor: pointer;
     border: none;
-
     background: var(--primary);
     color: #ffffff;
     box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
-
     transition:
-        transform 0.1s var(--ease-snappy),
-        background-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
+      transform 0.2s var(--ease-snappy),
+      background-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
 
-.btn-full:hover {
+  .btn-full:hover {
     background: var(--primary-hover);
     transform: translateY(-2px);
     box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4);
-}
+  }
 
-.btn-full:active {
+  .btn-full:active {
     transform: scale(0.96);
-}
+  }
 
-/* --------------------------------------------------------------------------
-   7. RODAPÉ & MENSAGENS
-   -------------------------------------------------------------------------- */
-.register-link {
+  /* --------------------------------------------------------------------------
+  7. RODAPÉ & MENSAGENS
+  -------------------------------------------------------------------------- */
+  .register-link {
     margin-top: 24px;
     font-size: 0.9rem;
     color: var(--text-secondary);
     font-weight: 500;
-}
-.register-link a {
+  }
+
+  .register-link a {
     color: var(--primary);
     text-decoration: none;
     font-weight: 700;
     transition: opacity 0.2s;
-}
-.register-link a:hover { opacity: 0.8; }
+  }
 
-.back-link {
+  .register-link a:hover { opacity: 0.8; }
+
+  .back-link {
     margin-top: 32px;
     display: inline-flex;
     align-items: center;
@@ -277,15 +262,16 @@
     padding: 8px 16px;
     border-radius: 20px;
     transition: all 0.2s ease;
-}
-.back-link:hover {
+  }
+
+  .back-link:hover {
     color: var(--text-main);
     background: var(--bg-input);
     transform: translateX(-2px);
-}
+  }
 
-/* Status Messages */
-.status-msg {
+  /* Status Messages */
+  .status-msg {
     display: none;
     padding: 12px;
     border-radius: 12px;
@@ -294,28 +280,34 @@
     font-weight: 600;
     text-align: center;
     animation: msgPop 0.4s var(--ease-spring) forwards;
-}
+  }
 
-@keyframes msgPop {
+  @keyframes msgPop {
     from { opacity: 0; transform: scale(0.9) translateY(-10px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
-}
+  }
 
-.status-msg.error {
+  .status-msg.error {
     background: var(--error-bg);
     color: var(--error-text);
     border: 1px solid var(--error-bg);
-}
-.status-msg.success {
+  }
+
+  .status-msg.success {
     background: var(--success-bg);
     color: var(--success-text);
     border: 1px solid var(--success-bg);
-}
+  }
 
-/* Mobile Fixes */
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-@media (max-width: 480px) {
+  /* Mobile Fixes */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  @media (max-width: 480px) {
     .login-card { padding: 32px 20px; }
     .form-row { grid-template-columns: 1fr; gap: 0; }
     .login-header h2 { font-size: 1.5rem; }
-}
+  }
