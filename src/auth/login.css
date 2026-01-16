@@ -365,3 +365,86 @@ OTIMIZAÇÃO DE PERFORMANCE - LOGIN
   opacity: 1 !important;
   transform: none !important;
 }
+
+/* ==========================================================================
+🔧 FIX: AUTOCOMPLETE DO NAVEGADOR (Chrome, Edge, Safari, Firefox)
+Força o tema correto mesmo quando o navegador preenche automaticamente
+========================================================================== */
+
+/* --- LIGHT MODE: Autocomplete com fundo claro --- */
+.input-wrapper input:-webkit-autofill,
+.input-wrapper input:-webkit-autofill:hover,
+.input-wrapper input:-webkit-autofill:focus,
+.input-wrapper input:-webkit-autofill:active,
+.input-wrapper select:-webkit-autofill,
+.input-wrapper select:-webkit-autofill:hover,
+.input-wrapper select:-webkit-autofill:focus {
+  /* 🎯 HACK: box-shadow cobre o fundo padrão do navegador */
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+  box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+
+  /* Força cor do texto */
+  -webkit-text-fill-color: var(--text-main) !important;
+  color: var(--text-main) !important;
+
+  /* Mantém borda */
+  border: 1px solid #e2e8f0 !important;
+
+  /* Transição suave */
+  transition: background-color 5000s ease-in-out 0s !important;
+
+  /* Mantém bordas arredondadas */
+  border-radius: 12px !important;
+}
+
+/* --- DARK MODE: Autocomplete com fundo escuro --- */
+[data-theme="dark"] .input-wrapper input:-webkit-autofill,
+[data-theme="dark"] .input-wrapper input:-webkit-autofill:hover,
+[data-theme="dark"] .input-wrapper input:-webkit-autofill:focus,
+[data-theme="dark"] .input-wrapper input:-webkit-autofill:active,
+[data-theme="dark"] .input-wrapper select:-webkit-autofill,
+[data-theme="dark"] .input-wrapper select:-webkit-autofill:hover,
+[data-theme="dark"] .input-wrapper select:-webkit-autofill:focus {
+  /* Fundo escuro do input no dark mode */
+  -webkit-box-shadow: 0 0 0 1000px rgba(44, 44, 46, 0.68) inset !important;
+  box-shadow: 0 0 0 1000px rgba(44, 44, 46, 0.68) inset !important;
+
+  /* Texto branco */
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+
+  /* Borda sutil dark */
+  border-color: rgba(255,255,255, 0.15) !important;
+
+  transition: background-color 5000s ease-in-out 0s !important;
+  border-radius: 12px !important;
+}
+
+/* 🦊 FIREFOX: Autocomplete Fix */
+.input-wrapper input:-moz-autofill,
+.input-wrapper select:-moz-autofill {
+  background-color: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="dark"] .input-wrapper input:-moz-autofill,
+[data-theme="dark"] .input-wrapper select:-moz-autofill {
+  background-color: rgba(44, 44, 46, 0.68) !important;
+  color: #ffffff !important;
+  border-color: rgba(255,255,255, 0.15) !important;
+}
+
+/* 🔍 AUTOCOMPLETE DROPDOWN (Lista de sugestões do navegador) */
+.input-wrapper input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+}
+
+/* 🎨 Remove o ícone de "gerenciar senhas" do Edge */
+.input-wrapper input::-ms-reveal,
+.input-wrapper input::-ms-clear {
+  display: none;
+}
+
