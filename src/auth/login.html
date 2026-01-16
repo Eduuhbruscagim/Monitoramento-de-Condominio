@@ -3,6 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ⚡ ANTI-FLASH: APLICA TEMA ANTES DO CSS CARREGAR -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      const validTheme = (savedTheme === 'dark') ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', validTheme);
+    })();
+  </script>
     <title>Login - Área do Síndico</title>
     <link rel="icon" type="image/png" href="../imagens/Logo.png">
     <script src="../performance.js"></script>
