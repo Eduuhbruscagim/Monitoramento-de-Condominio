@@ -2268,10 +2268,10 @@ OTIMIZAÇÃO DE PERFORMANCE - DASHBOARD
 [data-theme="dark"] input[type="time"],
 [data-theme="dark"] input[type="datetime-local"] {
   color: var(--text-main) !important;
-  background: var(--bg-input) !important;
-  border: 1px solid var(--border-glass) !important;
+  /* CORREÇÃO DO BUG: Removemos o background e borda forçados */
+  background: transparent !important;
+  border: none !important;
   color-scheme: dark; /* FORÇA o popup do calendário pro dark mode */
-
 }
 
 /* Ícone do calendário em BRANCO/CLARO */
@@ -2717,16 +2717,6 @@ OTIMIZAÇÃO DE PERFORMANCE - DASHBOARD
     border-color: #94a3b8 !important;
   }
 }
-
-
-
-
-
-
-
-
-
-
 
 /* ==========================================================================
    MOBILE - DIVISORES ENTRE CAMPOS (IGUALANDO AO DARK MODE)
