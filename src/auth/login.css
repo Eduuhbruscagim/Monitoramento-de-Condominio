@@ -366,6 +366,7 @@ OTIMIZAÇÃO DE PERFORMANCE - LOGIN
   transform: none !important;
 }
 
+
 /* ==========================================================================
 🔧 FIX: AUTOCOMPLETE DO NAVEGADOR (Chrome, Edge, Safari, Firefox)
 Força o tema correto mesmo quando o navegador preenche automaticamente
@@ -447,4 +448,5 @@ Força o tema correto mesmo quando o navegador preenche automaticamente
 .input-wrapper input::-ms-clear {
   display: none;
 }
+
 

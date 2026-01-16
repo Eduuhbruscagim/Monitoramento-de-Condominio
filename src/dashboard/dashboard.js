@@ -2,12 +2,11 @@ import { supabase } from "../services/supabase.js";
 
 /**
  * ============================================================================
- * 1. UTILS & HELPERS
- * Funções puras para formatação, segurança e datas.
+ * UTILS & HELPERS
+ * Funções utilitárias para formatação, segurança e datas
  * ============================================================================
  */
 const Utils = {
-  // Blinda o frontend contra XSS básico (Sanitization)
   safe: (str) => {
     if (!str) return "";
     return String(str)
@@ -34,14 +33,12 @@ const Utils = {
     }).format(Math.round(Number(value || 0)));
   },
 
-  // Ajusta o Timezone (UTC -> Local) para exibição correta
   ajustarDataBR: (isoOrDate) => {
     const d = new Date(isoOrDate);
-    d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     return d;
   },
 
-  // Gera string amigável: "Há 5 min", "Há 2 horas"
   formatarTempoRelativo: (data) => {
     const agora = new Date();
     const diff = Math.floor((agora - data) / 1000);
@@ -50,31 +47,59 @@ const Utils = {
     if (diff < 86400) return `Há ${Math.floor(diff / 3600)} h`;
     return `Há ${Math.floor(diff / 86400)} dias`;
   },
+
+  gerarAvatarPadrao: (nome) => {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      nome || "User"
+    )}&background=random&color=fff&size=200`;
+  },
+
+  validarImagemURL: (url) => {
+    return new Promise((resolve) => {
+      if (!url || url.trim() === "") {
+        resolve(false);
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+
+      setTimeout(() => resolve(false), 5000);
+    });
+  },
 };
 
 /**
  * ============================================================================
- * 2. GLOBAL STATE
- * Gerenciamento de estado da aplicação em memória.
+ * GLOBAL STATE
+ * Gerenciamento centralizado do estado da aplicação
  * ============================================================================
  */
+const CACHE_TTL = 5 * 60 * 1000;
+
 const State = {
   usuarioLogado: null,
   moradoresCache: [],
   idEditando: null,
 
-  // Cache de dados (Single Source of Truth)
   reservasCache: null,
-  ocorrenciasCache: null,
-  caixaCache: null,
-  notificacoesCache: null,
+  reservasCacheTime: 0,
 
-  // IDs temporários para modais de exclusão
+  ocorrenciasCache: null,
+  ocorrenciasCacheTime: 0,
+
+  caixaCache: null,
+  caixaCacheTime: 0,
+
+  notificacoesCache: null,
+  notificacoesCacheTime: 0,
+
   emailParaDeletar: null,
   reservaParaDeletar: null,
   ocorrenciaParaDeletar: null,
 
-  // Flags de Loading para evitar spam de cliques
   carregandoReservas: false,
   carregandoOcorrencias: false,
   carregandoCaixa: false,
@@ -82,7 +107,6 @@ const State = {
   carregandoKPIs: false,
 };
 
-// Helpers de Acesso Rápido
 const isAdmin = () =>
   State.usuarioLogado?.cargo === "Dono" ||
   State.usuarioLogado?.cargo === "admin";
@@ -97,8 +121,8 @@ const getMeuUserId = async () => {
 
 /**
  * ============================================================================
- * 3. SERVICES LAYER (DATA)
- * Responsabilidade: Falar com o Supabase e retornar dados brutos.
+ * SERVICES LAYER
+ * Camada de comunicação com o Supabase
  * ============================================================================
  */
 const MoradorService = {
@@ -117,17 +141,18 @@ const MoradorService = {
     if (error) throw new Error(error.message);
     return { session, perfil: data };
   },
+
   async listarTodos() {
     return await supabase
       .from("moradores")
-      .select("id, nome, email, cargo, celular, tipo, status, unidade, img")
+      .select("id, nome, email, cargo, celular, tipo, status, unidade, img, user_id")
       .order("id", { ascending: false });
   },
+
   async salvar(dados, id) {
     return await supabase.from("moradores").update(dados).eq("id", id);
   },
 
-  // NOVO: Atualiza o perfil do próprio usuário logado
   async atualizarMeuPerfil(id, dados) {
     const { data, error } = await supabase
       .from("moradores")
@@ -143,8 +168,42 @@ const MoradorService = {
   async excluir(email) {
     return await supabase.from("moradores").delete().eq("email", email);
   },
+
+  async excluirCompleto(user_id) {
+    try {
+      console.log("Deletando user_id:", user_id);
+
+      // Chama a função SQL no Supabase
+      const { data, error } = await supabase.rpc('delete_user_auth', {
+        target_user_id: user_id
+      });
+
+      if (error) {
+        console.error("Erro do Supabase:", error);
+        throw new Error(error.message);
+      }
+
+      console.log("Response data:", data);
+
+      // Verifica se retornou erro na resposta JSON
+      if (data && data.error) {
+        throw new Error(data.error);
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Erro completo:", error);
+      throw new Error(error.message || 'Erro ao deletar usuário');
+    }
+  },
+
   async logout() {
     try {
+      if (window.dashboardChannel) {
+        await window.dashboardChannel.unsubscribe();
+        window.dashboardChannel = null;
+      }
+
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Erro ao fazer logout:", error);
@@ -175,12 +234,14 @@ const ReservaService = {
       .select("id, area, data, user_id, nome_morador, created_at")
       .order("data", { ascending: true });
   },
+
   async criar(area, data) {
     const userId = await getMeuUserId();
     return await supabase
       .from("reservas")
       .insert([{ user_id: userId, area, data }]);
   },
+
   async deletar(id) {
     return await supabase.from("reservas").delete().eq("id", id);
   },
@@ -196,12 +257,14 @@ const OcorrenciaService = {
       .order("created_at", { ascending: false })
       .limit(50);
   },
+
   async criar(titulo, descricao) {
     const userId = await getMeuUserId();
     return await supabase
       .from("ocorrencias")
       .insert([{ user_id: userId, titulo, descricao }]);
   },
+
   async deletar(id) {
     return await supabase.from("ocorrencias").delete().eq("id", id);
   },
@@ -211,6 +274,7 @@ const CaixaService = {
   async saldo() {
     return await supabase.from("vw_saldo_caixa").select("saldo").single();
   },
+
   async listarPublico() {
     return await supabase
       .from("vw_caixa_movimentos_publico")
@@ -218,6 +282,7 @@ const CaixaService = {
       .order("created_at", { ascending: false })
       .limit(50);
   },
+
   async movimentar(tipo, valor, descricao) {
     const userId = await getMeuUserId();
     return await supabase
@@ -305,14 +370,13 @@ const NotificationService = {
 
 /**
  * ============================================================================
- * 4. UI LAYER (CONTROLLERS)
- * Responsabilidade: Manipular o DOM, Modais e HTML.
+ * UI LAYER
+ * Controladores de interface e manipulação do DOM
  * ============================================================================
  */
-
-// Controlador Genérico de Modais
 const ModalUX = {
   overlays: [],
+
   init() {
     this.overlays = Array.from(document.querySelectorAll(".modal-overlay"));
 
@@ -339,11 +403,13 @@ const ModalUX = {
         });
       });
   },
+
   open(overlay) {
     if (!overlay) return;
     overlay.classList.add("active");
     document.body.classList.add("modal-open");
   },
+
   close(overlay) {
     if (!overlay) return;
     overlay.classList.remove("active");
@@ -352,13 +418,13 @@ const ModalUX = {
     );
     if (!algumAberto) document.body.classList.remove("modal-open");
   },
+
   closeAll() {
     this.overlays.forEach((m) => m.classList.remove("active"));
     document.body.classList.remove("modal-open");
   },
 };
 
-// Controlador Principal da UI
 const UI = {
   elements: {
     toastContainer: document.getElementById("toast-container"),
@@ -375,6 +441,8 @@ const UI = {
     recentActivities: document.getElementById("recent-activities"),
   },
 
+  currentToast: null,
+
   showToast(message, type = "success") {
     const icons = {
       success: "fa-check",
@@ -386,6 +454,13 @@ const UI = {
       error: "Erro",
       info: "Informação",
     };
+
+    // Duração baseada no tipo - erro fica mais tempo
+    const duration = type === "error" ? 6000 : 4000;
+
+    if (this.currentToast && this.currentToast.isConnected) {
+      this.currentToast.remove();
+    }
 
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
@@ -410,12 +485,14 @@ const UI = {
 
     if (this.elements.toastContainer) {
       this.elements.toastContainer.appendChild(toast);
+      this.currentToast = toast;
+
       setTimeout(() => {
         if (toast.isConnected) {
           toast.style.animation = "toastExit 0.5s forwards";
           setTimeout(() => toast.remove(), 500);
         }
-      }, 4000);
+      }, duration);
     } else {
       console.warn("Toast container missing");
       alert(message);
@@ -437,15 +514,25 @@ const UI = {
     if (this.elements.userRole)
       this.elements.userRole.innerText = cargoAmigavel;
 
-    // Lógica para alternar entre Foto e Letra na Sidebar
+    // SEMPRE mostra a imagem se existir (seja personalizada ou UI Avatars)
     if (perfil.img && perfil.img.trim() !== "") {
       if (this.elements.userAvatar)
         this.elements.userAvatar.style.display = "none";
       if (this.elements.userAvatarImg) {
         this.elements.userAvatarImg.src = perfil.img;
         this.elements.userAvatarImg.style.display = "block";
+
+        // Fallback: se falhar ao carregar, mostra letra inicial
+        this.elements.userAvatarImg.onerror = () => {
+          this.elements.userAvatarImg.style.display = "none";
+          if (this.elements.userAvatar) {
+            this.elements.userAvatar.innerText = nome.charAt(0).toUpperCase();
+            this.elements.userAvatar.style.display = "flex";
+          }
+        };
       }
     } else {
+      // SÓ mostra letra inicial se NÃO tiver imagem nenhuma
       if (this.elements.userAvatarImg)
         this.elements.userAvatarImg.style.display = "none";
       if (this.elements.userAvatar) {
@@ -456,7 +543,6 @@ const UI = {
   },
 
   async renderizarKPIs() {
-    // 1. Saldo (KPI)
     if (this.elements.kpiSaldo) {
       const { data, error } = await CaixaService.saldo();
       if (error) {
@@ -472,7 +558,6 @@ const UI = {
       }
     }
 
-    // 2. Ocorrências (KPI)
     if (this.elements.kpiOcorrencias) {
       const { data, error } = await OcorrenciaService.listar();
       if (!error && data) {
@@ -488,7 +573,6 @@ const UI = {
       }
     }
 
-    // 3. Unidades (KPI)
     if (this.elements.kpiUnidades) {
       const { data } = await KpiService.unidades();
       if (data && data[0]) {
@@ -503,11 +587,12 @@ const UI = {
   async renderizarAtividadesRecentes() {
     if (!this.elements.recentActivities) return;
 
-    // Cache First
-    const temCache = State.reservasCache && State.reservasCache.length > 0;
+    const cacheValido =
+      State.reservasCache &&
+      State.reservasCache.length > 0 &&
+      Date.now() - State.reservasCacheTime < CACHE_TTL;
 
-    if (!temCache) {
-      // SKELETON
+    if (!cacheValido) {
       this.elements.recentActivities.innerHTML = Array(1)
         .fill(0)
         .map(
@@ -526,16 +611,16 @@ const UI = {
       this._renderActivitiesList(State.reservasCache);
     }
 
-    // Background fetch
     const { data, error } = await ReservaService.listar();
 
     if (error) {
-      if (!temCache)
+      if (!cacheValido)
         this.elements.recentActivities.innerHTML = `<div class="activity-item">Erro ao carregar.</div>`;
       return;
     }
 
     State.reservasCache = data;
+    State.reservasCacheTime = Date.now();
     this._renderActivitiesList(data);
   },
 
@@ -569,7 +654,7 @@ const UI = {
 
         return `
         <div class="activity-item">
-          <div class="activity-icon bg-blue"><i class="fa-solid fa- dar-day"></i></div>
+          <div class="activity-icon bg-blue"><i class="fa-solid fa-calendar-day"></i></div>
           <div class="activity-info">
             <h4>Reserva: ${Utils.safe(r.area)}</h4>
             <p>${linhaInfo}</p>
@@ -581,7 +666,6 @@ const UI = {
   },
 };
 
-// Controlador das Notificações
 const UINotifications = {
   btn: document.getElementById("btn-notifications"),
   panel: document.getElementById("notifications-panel"),
@@ -593,13 +677,14 @@ const UINotifications = {
   init() {
     if (!this.btn) return;
 
-    if (!document.getElementById("blur-overlay")) {
-      this.overlay = document.createElement("div");
-      this.overlay.id = "blur-overlay";
-      document.body.appendChild(this.overlay);
-    } else {
-      this.overlay = document.getElementById("blur-overlay");
+    const oldOverlay = document.getElementById("blur-overlay");
+    if (oldOverlay) {
+      oldOverlay.remove();
     }
+
+    this.overlay = document.createElement("div");
+    this.overlay.id = "blur-overlay";
+    document.body.appendChild(this.overlay);
 
     this.btn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -641,7 +726,11 @@ const UINotifications = {
   },
 
   async render() {
-    if (State.notificacoesCache) {
+    const cacheValido =
+      State.notificacoesCache &&
+      Date.now() - State.notificacoesCacheTime < CACHE_TTL;
+
+    if (cacheValido) {
       this.renderHTML(State.notificacoesCache);
       return;
     }
@@ -667,6 +756,7 @@ const UINotifications = {
     try {
       const itens = await NotificationService.buscarTudo();
       State.notificacoesCache = itens || [];
+      State.notificacoesCacheTime = Date.now();
       this.renderHTML(State.notificacoesCache);
     } catch (err) {
       this.list.innerHTML = `<div style="padding:20px;text-align:center;color:#ef4444">Erro.</div>`;
@@ -702,7 +792,6 @@ const UINotifications = {
   },
 };
 
-// Controlador de Configurações (NOVO)
 const UIConfig = {
   btn: document.getElementById("btn-configuracoes"),
   modal: document.getElementById("modal-configuracoes"),
@@ -715,28 +804,23 @@ const UIConfig = {
   init() {
     if (!this.btn) return;
 
-    // Abrir modal e preencher dados
     this.btn.addEventListener("click", () => {
       this.preencherDados();
       ModalUX.open(this.modal);
     });
 
-    // Alternar abas
     this.tabs.forEach((tab) => {
       tab.addEventListener("click", () => {
         const targetId = tab.dataset.tab;
 
-        // Atualiza botões
         this.tabs.forEach((t) => t.classList.remove("active"));
         tab.classList.add("active");
 
-        // Atualiza conteúdo
         this.panes.forEach((p) => p.classList.remove("active"));
         document.getElementById(targetId).classList.add("active");
       });
     });
 
-    // Salvar Perfil
     if (this.formPerfil) {
       this.formPerfil.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -744,7 +828,6 @@ const UIConfig = {
       });
     }
 
-    // Trocar Senha
     if (this.formSenha) {
       this.formSenha.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -752,7 +835,6 @@ const UIConfig = {
       });
     }
 
-    // Logout Outros Dispositivos
     if (this.btnLogoutOthers) {
       this.btnLogoutOthers.addEventListener("click", async () => {
         const btn = this.btnLogoutOthers;
@@ -760,7 +842,6 @@ const UIConfig = {
         btn.disabled = true;
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Encerrando...`;
 
-        // Global SignOut (Scope: Global)
         const { error } = await supabase.auth.signOut({ scope: "global" });
 
         if (error) {
@@ -769,7 +850,10 @@ const UIConfig = {
           btn.disabled = false;
         } else {
           UI.showToast("Sessões encerradas. Faça login novamente.", "success");
-          setTimeout(() => (window.location.href = "../auth/login.html"), 2000);
+          setTimeout(
+            () => (window.location.href = "../auth/login.html"),
+            2000
+          );
         }
       });
     }
@@ -779,14 +863,36 @@ const UIConfig = {
     const u = State.usuarioLogado;
     if (!u) return;
 
+    const nomeUsuario = u.nome || "User";
+    const avatarPadrao = Utils.gerarAvatarPadrao(nomeUsuario);
+
     document.getElementById("cfg-nome").value = u.nome || "";
     document.getElementById("cfg-celular").value = u.celular || "";
     document.getElementById("cfg-email").value = u.email || "";
-    document.getElementById("cfg-img-url").value = u.img || "";
-    document.getElementById("cfg-preview-img").src =
-      u.img || `https://ui-avatars.com/api/?name=${u.nome}`;
 
-    // Unidade e Bloco (ReadOnly)
+    const imgUrlInput = document.getElementById("cfg-img-url");
+    const urlAtual = u.img || "";
+
+    if (urlAtual.includes("ui-avatars.com")) {
+      imgUrlInput.value = "";
+    } else {
+      imgUrlInput.value = urlAtual;
+    }
+
+    const previewImg = document.getElementById("cfg-preview-img");
+
+    previewImg.onerror = () => {
+      imgUrlInput.value = "";
+      previewImg.src = avatarPadrao;
+      UI.showToast("URL de imagem inválida", "error");
+    };
+
+    if (!urlAtual || urlAtual.trim() === "" || urlAtual.includes("ui-avatars.com")) {
+      previewImg.src = avatarPadrao;
+    } else {
+      previewImg.src = urlAtual;
+    }
+
     if (u.unidade && u.unidade.includes(" - Bloco ")) {
       const [un, bl] = u.unidade.split(" - Bloco ");
       document.getElementById("cfg-unidade").value = un;
@@ -804,35 +910,71 @@ const UIConfig = {
     btn.innerText = "Salvando...";
 
     try {
-      const nome = document.getElementById("cfg-nome").value;
+      const nome = document.getElementById("cfg-nome").value.trim();
       const celular = document.getElementById("cfg-celular").value;
-      const imgUrl = document.getElementById("cfg-img-url").value;
+      const imgUrl = document.getElementById("cfg-img-url").value.trim();
 
-      // Se vazio, usa avatar gerado
-      const imgFinal =
-        imgUrl.trim() !== ""
-          ? imgUrl
-          : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              nome
-            )}&background=random`;
+      let imgFinal;
+      let urlInvalida = false;
+
+      if (imgUrl === "") {
+        imgFinal = Utils.gerarAvatarPadrao(nome);
+      } else {
+        const urlValida = await Utils.validarImagemURL(imgUrl);
+
+        if (urlValida) {
+          imgFinal = imgUrl;
+        } else {
+          imgFinal = Utils.gerarAvatarPadrao(nome);
+          document.getElementById("cfg-img-url").value = "";
+          urlInvalida = true;
+          UI.showToast("URL de imagem inválida. Usando avatar padrão.", "error");
+
+          // Aguarda 2 segundos antes de continuar
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
 
       const novosDados = { nome, celular, img: imgFinal };
 
-      // Atualiza no Banco
       await MoradorService.atualizarMeuPerfil(
         State.usuarioLogado.id,
         novosDados
       );
 
-      // Atualiza State Local e UI
       State.usuarioLogado = { ...State.usuarioLogado, ...novosDados };
+
       UI.atualizarSidebar(State.usuarioLogado);
-      document.getElementById("cfg-preview-img").src = imgFinal;
 
-      UI.showToast("Perfil atualizado!", "success");
+      const previewImg = document.getElementById("cfg-preview-img");
+      previewImg.src = imgFinal;
 
-      // Opcional: Fechar modal
-      // ModalUX.close(this.modal);
+      const moradorIndex = State.moradoresCache.findIndex(
+        (m) => m.id === State.usuarioLogado.id
+      );
+      if (moradorIndex !== -1) {
+        State.moradoresCache[moradorIndex] = {
+          ...State.moradoresCache[moradorIndex],
+          nome: novosDados.nome,
+          celular: novosDados.celular,
+          img: imgFinal,
+        };
+
+        if (
+          document
+            .getElementById("view-moradores")
+            ?.classList.contains("active")
+        ) {
+          UIMoradores.render();
+        }
+      }
+
+      // Mensagem diferente dependendo se houve erro ou não
+      if (!urlInvalida) {
+        UI.showToast("Perfil atualizado!", "success");
+      } else {
+        UI.showToast("Perfil atualizado com avatar padrão!", "info");
+      }
     } catch (error) {
       console.error(error);
       UI.showToast("Erro ao salvar: " + error.message, "error");
@@ -868,7 +1010,6 @@ const UIConfig = {
   },
 };
 
-// Controlador de Reservas
 const UIReserva = {
   lista: document.getElementById("lista-reservas"),
   modal: document.getElementById("modal-reserva"),
@@ -897,9 +1038,10 @@ const UIReserva = {
           created_at: new Date().toISOString(),
         };
 
-        // Optimistic UI
         if (State.reservasCache) {
-          State.reservasCache = [...State.reservasCache, reservaTemp];
+          State.reservasCache = [...State.reservasCache, reservaTemp].sort(
+            (a, b) => new Date(a.data) - new Date(b.data)
+          );
         } else {
           State.reservasCache = [reservaTemp];
         }
@@ -914,13 +1056,17 @@ const UIReserva = {
             (r) => r.id !== tempId
           );
           await this.carregar();
-          UI.showToast(
-            error.code === "23505" ? "Data indisponível!" : error.message,
-            "error"
-          );
+
+          if (error.code === "23505") {
+            UI.showToast("Horário já reservado por outro morador!", "error");
+          } else {
+            UI.showToast(error.message, "error");
+          }
         } else {
           UI.showToast("Reserva confirmada!", "success");
-          State.notificacoesCache = null; // Invalida notificações
+          State.notificacoesCache = null;
+          State.notificacoesCacheTime = 0;
+          await this.carregar();
         }
       });
     }
@@ -934,7 +1080,6 @@ const UIReserva = {
           (r) => r.id === idParaDeletar
         );
 
-        // Optimistic UI
         if (State.reservasCache) {
           State.reservasCache = State.reservasCache.filter(
             (r) => r.id !== idParaDeletar
@@ -950,12 +1095,15 @@ const UIReserva = {
         const { error } = await ReservaService.deletar(idParaDeletar);
         if (error) {
           if (reservaOriginal && State.reservasCache) {
-            State.reservasCache = [...State.reservasCache, reservaOriginal];
+            State.reservasCache = [...State.reservasCache, reservaOriginal].sort(
+              (a, b) => new Date(a.data) - new Date(b.data)
+            );
           }
           await this.carregar();
           UI.showToast(error.message, "error");
         } else {
           State.notificacoesCache = null;
+          State.notificacoesCacheTime = 0;
         }
       });
     }
@@ -1023,7 +1171,6 @@ const UIReserva = {
     const souDono = isAdmin();
     const colCount = souDono ? 4 : 3;
 
-    // SKELETON apenas se a lista estiver vazia (primeira carga real)
     if (!this.lista.children.length) {
       this.lista.innerHTML = Array(1)
         .fill(0)
@@ -1049,6 +1196,7 @@ const UIReserva = {
       if (error) throw error;
 
       State.reservasCache = data || [];
+      State.reservasCacheTime = Date.now();
       this.renderizarLista(State.reservasCache);
     } catch (e) {
       this.lista.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center">Erro.</td></tr>`;
@@ -1058,7 +1206,6 @@ const UIReserva = {
   },
 };
 
-// Controlador de Ocorrências
 const UIOcorrencias = {
   lista: document.getElementById("lista-ocorrencias"),
   modal: document.getElementById("modal-ocorrencia"),
@@ -1094,7 +1241,6 @@ const UIOcorrencias = {
           registrador_celular: State.usuarioLogado?.celular,
         };
 
-        // Optimistic UI
         if (State.ocorrenciasCache) {
           State.ocorrenciasCache = [ocTemp, ...State.ocorrenciasCache];
         } else {
@@ -1114,7 +1260,9 @@ const UIOcorrencias = {
           await this.carregar();
           UI.showToast(error.message, "error");
         } else {
-          State.notificacoesCache = null; // Invalida notificações
+          State.notificacoesCache = null;
+          State.notificacoesCacheTime = 0;
+          await this.carregar();
         }
       });
     }
@@ -1128,7 +1276,6 @@ const UIOcorrencias = {
           (o) => o.id === idParaDeletar
         );
 
-        // Optimistic UI
         if (State.ocorrenciasCache) {
           State.ocorrenciasCache = State.ocorrenciasCache.filter(
             (o) => o.id !== idParaDeletar
@@ -1153,6 +1300,7 @@ const UIOcorrencias = {
           UI.showToast(error.message, "error");
         } else {
           State.notificacoesCache = null;
+          State.notificacoesCacheTime = 0;
         }
       });
     }
@@ -1256,6 +1404,7 @@ const UIOcorrencias = {
       if (error) throw error;
 
       State.ocorrenciasCache = data || [];
+      State.ocorrenciasCacheTime = Date.now();
       this.renderizarLista(State.ocorrenciasCache);
     } catch (e) {
       const colspan = isAdmin() ? 6 : 4;
@@ -1266,7 +1415,6 @@ const UIOcorrencias = {
   },
 };
 
-// Controlador do Caixa
 const UICaixa = {
   modal: document.getElementById("modal-caixa"),
   form: document.getElementById("form-caixa"),
@@ -1283,8 +1431,12 @@ const UICaixa = {
 
     if (this.btnVer) {
       this.btnVer.addEventListener("click", () => {
-        // CACHE: Usa memória se tiver
-        if (State.caixaCache && State.caixaCache.length > 0) {
+        const cacheValido =
+          State.caixaCache &&
+          State.caixaCache.length > 0 &&
+          Date.now() - State.caixaCacheTime < CACHE_TTL;
+
+        if (cacheValido) {
           this.renderizarLista(State.caixaCache);
         } else {
           this.carregarExtrato();
@@ -1312,8 +1464,10 @@ const UICaixa = {
         else {
           UI.showToast("Caixa atualizado", "success");
           this.form.reset();
-          State.caixaCache = null; // Invalida cache
+          State.caixaCache = null;
+          State.caixaCacheTime = 0;
           State.notificacoesCache = null;
+          State.notificacoesCacheTime = 0;
           ModalUX.close(this.modal);
         }
         btn.innerText = original;
@@ -1347,6 +1501,7 @@ const UICaixa = {
       if (error) throw error;
 
       State.caixaCache = data || [];
+      State.caixaCacheTime = Date.now();
       this.renderizarLista(State.caixaCache);
     } catch (err) {
       this.listaHistorico.innerHTML = `<tr><td colspan="4" style="text-align:center">Erro.</td></tr>`;
@@ -1381,7 +1536,6 @@ const UICaixa = {
   },
 };
 
-// Controlador de Moradores
 const UIMoradores = {
   tabela: document.getElementById("lista-moradores"),
   modal: document.getElementById("modal-novo-morador"),
@@ -1452,11 +1606,36 @@ const UIMoradores = {
 
     this.btnDelete?.addEventListener("click", async () => {
       if (!State.emailParaDeletar) return;
-      await MoradorService.excluir(State.emailParaDeletar);
-      UI.showToast("Morador removido");
-      ModalUX.close(this.modalDelete);
-      State.emailParaDeletar = null;
-      this.carregar();
+
+      const btn = this.btnDelete;
+      const originalText = btn.innerText;
+      btn.disabled = true;
+      btn.innerText = "Excluindo...";
+
+      try {
+        // Busca o user_id do morador
+        const morador = State.moradoresCache.find(
+          (m) => m.email === State.emailParaDeletar
+        );
+
+        if (!morador?.user_id) {
+          throw new Error("Usuário não encontrado");
+        }
+
+        // Chama a função SQL para deletar completamente
+        await MoradorService.excluirCompleto(morador.user_id);
+
+        UI.showToast("Usuário excluído do sistema!", "success");
+        ModalUX.close(this.modalDelete);
+        State.emailParaDeletar = null;
+        await this.carregar();
+      } catch (error) {
+        console.error(error);
+        UI.showToast(error.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
     });
   },
 
@@ -1526,8 +1705,10 @@ const UIMoradores = {
         <td>
           <div class="user-cell">
             <img src="${
-              m.img || `https://ui-avatars.com/api/?name=${m.nome}`
-            }" class="user-avatar" />
+              m.img || Utils.gerarAvatarPadrao(m.nome)
+            }" class="user-avatar" onerror="this.src='${Utils.gerarAvatarPadrao(
+          m.nome
+        )}'" />
             <div><strong class="td-titulo">${Utils.safe(
               m.nome
             )}</strong><br/><small>${Utils.safe(m.tipo)}</small></div>
@@ -1545,7 +1726,8 @@ const UIMoradores = {
 
 /**
  * ============================================================================
- * 5. MAIN INIT & REALTIME
+ * MAIN INIT & REALTIME
+ * Inicialização principal e configuração de realtime
  * ============================================================================
  */
 document.addEventListener("DOMContentLoaded", async () => {
@@ -1565,7 +1747,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     UICaixa.init();
     UIMoradores.init();
     UINotifications.init();
-    UIConfig.init(); // Init UIConfig
+    UIConfig.init();
 
     await Promise.all([
       UI.renderizarKPIs(),
@@ -1574,13 +1756,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     ]);
 
     const channel = supabase.channel("dashboard-changes");
+
     channel
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "ocorrencias" },
         () => {
           UI.renderizarKPIs();
-          State.notificacoesCache = null; // Invalida
+          State.notificacoesCache = null;
+          State.notificacoesCacheTime = 0;
+          State.ocorrenciasCache = null;
+          State.ocorrenciasCacheTime = 0;
           if (
             document
               .getElementById("view-ocorrencias")
@@ -1594,7 +1780,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         { event: "*", schema: "public", table: "reservas" },
         () => {
           UI.renderizarAtividadesRecentes();
-          State.notificacoesCache = null; // Invalida
+          State.notificacoesCache = null;
+          State.notificacoesCacheTime = 0;
+          State.reservasCache = null;
+          State.reservasCacheTime = 0;
           if (
             document
               .getElementById("view-reservas")
@@ -1608,8 +1797,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         { event: "*", schema: "public", table: "caixa_movimentos" },
         () => {
           UI.renderizarKPIs();
-          State.caixaCache = null; // Invalida
-          State.notificacoesCache = null; // Invalida
+          State.caixaCache = null;
+          State.caixaCacheTime = 0;
+          State.notificacoesCache = null;
+          State.notificacoesCacheTime = 0;
           if (UICaixa.modalHistorico.classList.contains("active"))
             UICaixa.carregarExtrato();
         }
@@ -1617,7 +1808,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "moradores" },
-        () => {
+        async (payload) => {
+          if (
+            payload.eventType === "UPDATE" &&
+            payload.new.id === State.usuarioLogado?.id
+          ) {
+            const novosDados = payload.new;
+            State.usuarioLogado = { ...State.usuarioLogado, ...novosDados };
+            UI.atualizarSidebar(State.usuarioLogado);
+
+            const moradorIndex = State.moradoresCache.findIndex(
+              (m) => m.id === novosDados.id
+            );
+            if (moradorIndex !== -1) {
+              State.moradoresCache[moradorIndex] = {
+                ...State.moradoresCache[moradorIndex],
+                ...novosDados,
+              };
+              if (
+                document
+                  .getElementById("view-moradores")
+                  ?.classList.contains("active")
+              ) {
+                UIMoradores.render();
+              }
+            }
+          }
+
           UI.renderizarKPIs();
           if (
             document
@@ -1629,7 +1846,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       )
       .subscribe();
 
-    console.log("🚀 Dashboard sincronizado.");
+    window.dashboardChannel = channel;
+
+    console.log("Dashboard sincronizado.");
   } catch (err) {
     console.error("Fatal:", err);
   }
@@ -1663,14 +1882,34 @@ document.addEventListener("DOMContentLoaded", async () => {
         link.dataset.title;
 
       if (targetId === "view-reservas") {
-        if (State.reservasCache) UIReserva.renderizarLista(State.reservasCache);
-        else await UIReserva.carregar();
+        const cacheValido =
+          State.reservasCache &&
+          Date.now() - State.reservasCacheTime < CACHE_TTL;
+
+        if (cacheValido) {
+          UIReserva.renderizarLista(State.reservasCache);
+        } else {
+          await UIReserva.carregar();
+        }
       }
 
       if (targetId === "view-ocorrencias") {
-        if (State.ocorrenciasCache)
+        const cacheValido =
+          State.ocorrenciasCache &&
+          Date.now() - State.ocorrenciasCacheTime < CACHE_TTL;
+
+        if (cacheValido) {
           UIOcorrencias.renderizarLista(State.ocorrenciasCache);
-        else await UIOcorrencias.carregar();
+        } else {
+          await UIOcorrencias.carregar();
+        }
+      }
+
+      // Re-renderiza moradores quando entrar na aba
+      if (targetId === "view-moradores") {
+        if (State.moradoresCache && State.moradoresCache.length > 0) {
+          UIMoradores.render();
+        }
       }
     });
   });
@@ -1682,8 +1921,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   window.abrirModalExtrato = () => {
-    // Usa o cache se tiver
-    if (State.caixaCache && State.caixaCache.length > 0) {
+    const cacheValido =
+      State.caixaCache &&
+      State.caixaCache.length > 0 &&
+      Date.now() - State.caixaCacheTime < CACHE_TTL;
+
+    if (cacheValido) {
       UICaixa.renderizarLista(State.caixaCache);
     } else {
       UICaixa.carregarExtrato();
@@ -1708,4 +1951,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.fecharModalExclusao = () => ModalUX.closeAll();
   window.fecharModalExclusaoReserva = () => ModalUX.closeAll();
   window.fecharModalExclusaoOcorrencia = () => ModalUX.closeAll();
+});
+
+window.addEventListener("beforeunload", () => {
+  if (window.dashboardChannel) {
+    window.dashboardChannel.unsubscribe();
+    window.dashboardChannel = null;
+  }
 });

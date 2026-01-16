@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- ⚡ ANTI-FLASH: APLICA TEMA ANTES DO CSS CARREGAR -->
-  <script>
-    (function() {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      const validTheme = (savedTheme === 'dark') ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', validTheme);
-    })();
-  </script>
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const validTheme = (savedTheme === 'dark') ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', validTheme);
+      })();
+    </script>
     <title>Login - Área do Síndico</title>
     <link rel="icon" type="image/png" href="../imagens/Logo.png">
     <script src="../performance.js"></script>
@@ -65,11 +65,9 @@
 
         <div class="actions">
           <label class="remember-me">
-            <input type="checkbox" /> Lembrar de mim
+            <input type="checkbox" id="remember-me" /> Lembrar de mim
           </label>
-          <a href="forgot-password.html" class="forgot-pass"
-            >Esqueceu a senha?</a
-          >
+          <a href="forgot-password.html" class="forgot-pass">Esqueceu a senha?</a>
         </div>
 
         <div id="feedback" class="status-msg"></div>
@@ -92,27 +90,54 @@
       // Importa a instância única configurada
       import { supabase } from '../services/supabase.js';
 
-      // Expõe a função para o escopo global (window)
-      // Necessário porque módulos são isolados e o onsubmit do HTML não veria a função
+      // ==========================================
+      // 🔧 FUNÇÃO DE VALIDAÇÃO DE EMAIL
+      // ==========================================
+      function validarEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+      }
+
+      // ==========================================
+      // 📝 FUNÇÃO PRINCIPAL DE LOGIN
+      // Checkbox "Lembrar-me" com funcionalidade
+      // ==========================================
       window.handleLogin = async function(e) {
         e.preventDefault();
 
         // Elementos da tela
         const btn = e.target.querySelector("button");
         const feedbackBox = document.getElementById("feedback");
-        const email = document.getElementById("email").value.toLowerCase().trim();
-        const password = document.getElementById("password").value;
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const rememberCheckbox = document.getElementById("remember-me");
+
+        const email = emailInput.value.toLowerCase().trim();
+        const password = passwordInput.value;
         const originalText = btn.innerText;
 
-        // Limpa mensagens anteriores e mostra carregamento
+        // Limpa mensagens anteriores
         feedbackBox.style.display = "none";
         feedbackBox.className = "status-msg";
 
+        // ==========================================
+        // ✅ VALIDAÇÃO DE EMAIL NO FRONTEND
+        // ==========================================
+        if (!validarEmail(email)) {
+          feedbackBox.innerText = "Digite um e-mail válido";
+          feedbackBox.classList.add("error");
+          feedbackBox.style.display = "block";
+          return;
+        }
+
+        // Loading state
         btn.innerText = "Autenticando...";
         btn.disabled = true;
         btn.style.opacity = "0.7";
 
-        // Tenta Logar usando o cliente importado
+        // ==========================================
+        // 🔒 AUTENTICAÇÃO COM SUPABASE
+        // ==========================================
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email,
           password: password,
@@ -129,7 +154,16 @@
           btn.disabled = false;
           btn.style.opacity = "1";
         } else {
-          // SUCESSO
+          // ==========================================
+          // ✅ FUNCIONALIDADE "LEMBRAR DE MIM"
+          // ==========================================
+          if (rememberCheckbox.checked) {
+            localStorage.setItem('keepSession', 'true');
+          } else {
+            localStorage.removeItem('keepSession');
+          }
+
+          // SUCESSO - Redireciona
           window.location.href = "../dashboard/dashboard.html";
         }
       }
