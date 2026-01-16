@@ -3,6 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ⚡ ANTI-FLASH: APLICA TEMA ANTES DO CSS CARREGAR -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      const validTheme = (savedTheme === 'dark') ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', validTheme);
+    })();
+  </script>
     <title>Gestão Inteligente de Condomínios</title>
 
     <meta
@@ -19,7 +27,7 @@
     />
     <meta property="og:image" content="imagens/Mac.png" />
     <script src="performance.js"></script>
-    <link rel="icon" type="image/png" href="imagens/Logo.png">
+    <link rel="icon" type="image/png" href="imagens/Logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -53,18 +61,35 @@
         <!-- Desktop Links -->
         <ul class="nav-links desktop-only">
           <li><a href="index.html" class="nav-link active">Início</a></li>
-          <li><a href="#funcionalidades" class="nav-link">Funcionalidades</a></li>
+          <li>
+            <a href="#funcionalidades" class="nav-link">Funcionalidades</a>
+          </li>
           <li><a href="#recursos" class="nav-link">Recursos</a></li>
           <li><a href="about/sobre.html" class="nav-link">Sobre</a></li>
         </ul>
 
         <div class="dock-actions">
-          <a
-            href="auth/login.html"
-            class="btn btn-primary btn-sm desktop-only"
+          <!-- Botão de Tema Desktop -->
+          <button
+            id="theme-toggle"
+            class="btn-icon-glass desktop-only"
+            aria-label="Alternar tema"
           >
+            <i class="fa-solid fa-sun"></i>
+          </button>
+
+          <a href="auth/login.html" class="btn btn-primary btn-sm desktop-only">
             Área de Login
           </a>
+
+          <!-- Botão de Tema Mobile (aparece só quando menu aberto) -->
+          <button
+            id="theme-toggle-mobile"
+            class="btn-icon-glass theme-mobile-btn"
+            aria-label="Alternar tema"
+          >
+            <i class="fa-solid fa-sun"></i>
+          </button>
 
           <button class="mobile-toggle" aria-label="Abrir Menu">
             <i class="fa-solid fa-bars"></i>
@@ -79,9 +104,13 @@
           <li><a href="#funcionalidades">Funcionalidades</a></li>
           <li><a href="#recursos">Recursos</a></li>
           <li><a href="about/sobre.html">Sobre</a></li>
-          <li><hr class="divider"></li>
+          <li><hr class="divider" /></li>
           <li>
-            <a href="auth/login.html" class="btn btn-primary" style="width: 100%; justify-content: center;">
+            <a
+              href="auth/login.html"
+              class="btn btn-primary"
+              style="width: 100%; justify-content: center"
+            >
               Fazer Login
             </a>
           </li>
@@ -97,8 +126,12 @@
           áreas, receba encomendas e registre ocorrências direto pelo sistema.
         </p>
         <div class="cta-group">
-          <a href="auth/login.html" class="btn btn-primary">Já tenho cadastro</a>
-          <a href="auth/register.html" class="btn btn-outline">Não tenho cadastro</a>
+          <a href="auth/login.html" class="btn btn-primary"
+            >Já tenho cadastro</a
+          >
+          <a href="auth/register.html" class="btn btn-outline"
+            >Não tenho cadastro</a
+          >
         </div>
       </div>
 
@@ -220,12 +253,16 @@
       </div>
     </footer>
 
+    <!-- Theme Manager Script -->
+    <script src="dashboard/theme.js"></script>
+
     <script>
       /**
        * 1. Lógica do Menu Mobile (Drawer)
        */
       const mobileBtn = document.querySelector(".mobile-toggle");
       const mobileMenu = document.querySelector(".mobile-menu-drawer");
+      const themeBtn = document.querySelector(".theme-mobile-btn");
       const dock = document.querySelector(".floating-dock");
 
       if (mobileBtn && mobileMenu) {
@@ -238,31 +275,32 @@
           if (mobileMenu.classList.contains("active")) {
             icon.classList.remove("fa-bars");
             icon.classList.add("fa-xmark");
+            // Mostra o botão de tema
+            if (themeBtn) themeBtn.classList.add("show");
           } else {
             icon.classList.remove("fa-xmark");
             icon.classList.add("fa-bars");
+            // Esconde o botão de tema
+            if (themeBtn) themeBtn.classList.remove("show");
           }
         });
 
         // Fechar ao clicar fora
         document.addEventListener("click", (e) => {
-          if (mobileMenu.classList.contains("active") && !dock.contains(e.target)) {
+          if (
+            mobileMenu.classList.contains("active") &&
+            !dock.contains(e.target)
+          ) {
             mobileMenu.classList.remove("active");
             dock.classList.remove("menu-open");
             const icon = mobileBtn.querySelector("i");
             icon.classList.remove("fa-xmark");
             icon.classList.add("fa-bars");
+            // Esconde o botão de tema
+            if (themeBtn) themeBtn.classList.remove("show");
           }
         });
       }
-
-      /**
-       * 2. Scroll Awareness (Esconder Dock ao rolar para baixo)
-       */
-      let lastScrollTop = 0;
-      const navDock = document.querySelector('.floating-dock');
-
-
 
       /**
        * 3. Botão "Copiar E-mail"

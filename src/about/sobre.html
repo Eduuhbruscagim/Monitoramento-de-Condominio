@@ -3,8 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ⚡ ANTI-FLASH: APLICA TEMA ANTES DO CSS CARREGAR -->
+    <script>
+      (function () {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        const validTheme = savedTheme === "dark" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", validTheme);
+      })();
+    </script>
     <title>Sobre Nós - Condomínio App</title>
-    <link rel="icon" type="image/png" href="../imagens/Logo.png">
+    <link rel="icon" type="image/png" href="../imagens/Logo.png" />
     <script src="../performance.js"></script>
     <link
       rel="stylesheet"
@@ -18,6 +26,7 @@
     <link rel="stylesheet" href="../global.css" />
     <link rel="stylesheet" href="sobre.css" />
   </head>
+  <script src="../dashboard/theme.js"></script>
   <body class="about-page">
     <div class="glass-nav">
       <a href="../index.html" class="logo-area">

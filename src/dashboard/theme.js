@@ -1,77 +1,91 @@
+// ============================================================================
+// SRC/JS/THEME.JS - Sistema de Temas (Light/Dark Only)
+// Versão: 2.1 (Suporte Desktop + Mobile)
+// ============================================================================
+
 const ThemeManager = {
+
     init() {
-        this.btn = document.getElementById('theme-toggle');
-        this.icon = this.btn?.querySelector('i');
+      // Busca TODOS os botões de tema (desktop e mobile)
+      this.buttons = document.querySelectorAll('#theme-toggle, #theme-toggle-mobile');
 
-        // Carregar tema salvo ou usar "system" como padrão
-        const saved = localStorage.getItem('theme') || 'system';
-        this.applyTheme(saved);
+      // Carregar tema salvo ou usar "light" como padrão
+      const saved = localStorage.getItem('theme') || 'light';
+      const validTheme = (saved === 'dark') ? 'dark' : 'light';
 
-        // Event Listener do Botão (ciclar entre os 3 temas)
-        if (this.btn) {
-            this.btn.addEventListener('click', () => this.toggle());
+      this.applyTheme(validTheme, false);
+
+      // Event Listener para TODOS os botões
+      this.buttons.forEach(btn => {
+        if (btn) {
+          btn.addEventListener('click', () => this.toggle());
         }
-
-        // Escutar mudanças de preferência do sistema (quando tema = system)
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-            const currentTheme = localStorage.getItem('theme');
-            if (currentTheme === 'system') {
-                document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-            }
-        });
+      });
     },
 
     toggle() {
-        const current = localStorage.getItem('theme') || 'system';
+      const current = localStorage.getItem('theme') || 'light';
+      const newTheme = (current === 'light') ? 'dark' : 'light';
 
-        let newTheme;
-        if (current === 'light') {
-            newTheme = 'dark';
-        } else if (current === 'dark') {
-            newTheme = 'system';
-        } else {
-            newTheme = 'light';
-        }
-
-        localStorage.setItem('theme', newTheme);
-        this.applyTheme(newTheme);
+      localStorage.setItem('theme', newTheme);
+      this.applyTheme(newTheme, true);
     },
 
-    applyTheme(theme) {
-        if (theme === 'system') {
-            // Detectar preferência do sistema
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.setAttribute('data-theme', systemPrefersDark ? 'dark' : 'light');
-            this.updateIcon('system');
-        } else {
-            document.documentElement.setAttribute('data-theme', theme);
-            this.updateIcon(theme);
-        }
+    applyTheme(theme, animated = true) {
+      const html = document.documentElement;
+
+      if (animated) {
+        html.classList.add('theme-transitioning');
+      }
+
+      html.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+
+      // Atualiza TODOS os ícones
+      this.updateIcons(theme, animated);
+
+      if (animated) {
+        setTimeout(() => {
+          html.classList.remove('theme-transitioning');
+        }, 400);
+      }
     },
 
-    updateIcon(theme) {
-        if (!this.icon) return;
+    updateIcons(theme, animated = true) {
+      // Percorre TODOS os botões e atualiza cada um
+      this.buttons.forEach(btn => {
+        if (!btn) return;
+
+        const icon = btn.querySelector('i');
+        if (!icon) return;
 
         // Remove classes anteriores
-        this.icon.classList.remove('fa-sun', 'fa-moon', 'fa-circle-half-stroke');
+        icon.className = '';
 
         if (theme === 'light') {
-            this.icon.classList.add('fa-sun'); // Sol
-            this.btn.title = "Modo Claro";
-        } else if (theme === 'dark') {
-            this.icon.classList.add('fa-moon'); // Lua
-            this.btn.title = "Modo Escuro";
+          icon.className = 'fa-solid fa-sun';
+          btn.title = "Modo Claro";
+          btn.setAttribute('aria-label', 'Ativar modo escuro');
         } else {
-            this.icon.classList.add('fa-circle-half-stroke'); // Metade claro/escuro
-            this.btn.title = "Modo Sistema";
+          icon.className = 'fa-solid fa-moon';
+          btn.title = "Modo Escuro";
+          btn.setAttribute('aria-label', 'Ativar modo claro');
         }
 
         // Animação de rotação
-        this.icon.style.transition = 'transform 0.3s ease';
-        this.icon.style.transform = 'rotate(360deg) scale(0.8)';
-        setTimeout(() => this.icon.style.transform = 'rotate(0deg) scale(1)', 300);
-    }
-};
+        if (animated) {
+          icon.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+          icon.style.transform = 'rotate(360deg) scale(0.85)';
 
-// Executa assim que o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', () => ThemeManager.init());
+          setTimeout(() => {
+            icon.style.transform = 'rotate(0deg) scale(1)';
+          }, 400);
+        }
+      });
+    }
+  };
+
+
+
+  // Executa assim que o DOM estiver pronto
+  document.addEventListener('DOMContentLoaded', () => ThemeManager.init());

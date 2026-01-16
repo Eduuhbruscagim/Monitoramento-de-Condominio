@@ -1798,3 +1798,973 @@ OTIMIZAÇÃO DE PERFORMANCE - DASHBOARD
   animation: none !important;
 }
 
+
+
+
+
+
+/* ==========================================================================
+   DARK MODE APPLE-STYLE - PADRÃO INDEX.CSS
+   Background preto puro + vidros consistentes + estilo limpo
+========================================================================== */
+
+/* ============ 1. BACKGROUND PRETO PURO ============ */
+[data-theme="dark"] body {
+  background: var(--bg-body) !important;
+  background-attachment: fixed;
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .dashboard-container {
+  background: transparent;
+}
+
+[data-theme="dark"] #blur-overlay {
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ============ 2. SIDEBAR - PADRÃO GLASS NAV ============ */
+[data-theme="dark"] .sidebar {
+  background: var(--bg-glass-nav) !important;
+  backdrop-filter: saturate(200%) blur(40px);
+  -webkit-backdrop-filter: saturate(200%) blur(40px);
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-glass), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .sidebar-logo {
+  filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+}
+
+[data-theme="dark"] .menu-item {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .menu-item:hover {
+  background: var(--bg-input) !important;
+  color: var(--primary);
+  transform: translateX(4px);
+}
+
+[data-theme="dark"] .menu-item.active {
+  background: var(--primary) !important;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+[data-theme="dark"] .sidebar-footer {
+  border-top: 1px solid var(--border-glass);
+}
+
+[data-theme="dark"] .menu-item.logout {
+  color: #ff453a;
+}
+
+[data-theme="dark"] .menu-item.logout:hover {
+  background: rgba(255, 69, 58, 0.15) !important;
+  color: #ff6e63;
+  transform: none;
+}
+
+[data-theme="dark"] .user-profile-mini {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-glass);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+[data-theme="dark"] .user-profile-mini:hover {
+  background: var(--bg-input) !important;
+}
+
+[data-theme="dark"] .avatar-circle {
+  background: rgba(37, 99, 235, 0.1) !important;
+  color: var(--primary);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .avatar-circle-img {
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .user-info strong {
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .user-info small {
+  color: var(--text-secondary);
+}
+
+/* ============ 3. TOP BAR - PADRÃO LIMPO ============ */
+[data-theme="dark"] .page-title {
+  color: var(--text-main) !important;
+  background: none;
+  -webkit-text-fill-color: inherit;
+}
+
+[data-theme="dark"] .btn-icon-glass,
+[data-theme="dark"] .icon-btn,
+[data-theme="dark"] .btn-settings {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-glass);
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .btn-icon-glass:hover,
+[data-theme="dark"] .icon-btn:hover,
+[data-theme="dark"] .btn-settings:hover {
+  background: var(--bg-input-focus) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .notification-dot {
+  background: #ef4444;
+  border: 2px solid #000000;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ============ 4. TABS ============ */
+[data-theme="dark"] .tabs-header {
+  border-bottom: 1px solid var(--border-glass);
+}
+
+[data-theme="dark"] .tab-btn {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .tab-btn.active {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .tab-btn:hover:not(.active) {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .locked-input {
+  background: var(--bg-input) !important;
+  border-color: var(--border-glass) !important;
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .locked-input input {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .input-lock-icon {
+  color: var(--text-secondary);
+}
+
+/* ============ 5. KPIs/STAT CARDS - PADRÃO GLASS PANEL ============ */
+[data-theme="dark"] .stat-card {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .stat-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  background: var(--bg-input) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .icon-box.blue {
+  background: rgba(37, 99, 235, 0.15);
+  color: var(--primary);
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.2);
+}
+
+[data-theme="dark"] .icon-box.purple {
+  background: rgba(147, 51, 234, 0.15);
+  color: #a855f7;
+  box-shadow: inset 0 0 0 1px rgba(147, 51, 234, 0.2);
+}
+
+[data-theme="dark"] .icon-box.green {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.2);
+}
+
+[data-theme="dark"] .icon-box.orange {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.2);
+}
+
+[data-theme="dark"] .stat-label {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .stat-value {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .stat-change.orange {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+[data-theme="dark"] .stat-change.text-light {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .kpi-plus,
+[data-theme="dark"] .kpi-eye {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-glass) !important;
+  color: var(--primary);
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .kpi-plus:hover,
+[data-theme="dark"] .kpi-eye:hover {
+  transform: translateY(-2px);
+  background: var(--primary) !important;
+  color: #ffffff;
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* ============ 6. ATIVIDADES RECENTES ============ */
+[data-theme="dark"] .section-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .activity-list {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .activity-item {
+  border-bottom: 1px solid var(--border-glass);
+}
+
+[data-theme="dark"] .activity-item:last-child {
+  border-bottom: none;
+}
+
+[data-theme="dark"] .activity-item:hover {
+  background: var(--bg-input) !important;
+}
+
+[data-theme="dark"] .activity-icon {
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .bg-blue {
+  background: linear-gradient(135deg, #3b82f6, var(--primary));
+}
+
+[data-theme="dark"] .bg-orange {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+[data-theme="dark"] .activity-info h4 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .activity-info p {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .activity-time {
+  color: var(--text-secondary) !important;
+  background: var(--bg-input);
+  border: 1px solid var(--border-glass);
+}
+
+/* ============ 7. TABELAS ============ */
+[data-theme="dark"] .table-container {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .glass-table th,
+[data-theme="dark"] .tabela-reservas-isolada th {
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+[data-theme="dark"] .glass-table td,
+[data-theme="dark"] .tabela-reservas-isolada td {
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+[data-theme="dark"] .glass-table tr:last-child td,
+[data-theme="dark"] .tabela-reservas-isolada tr:last-child td {
+  border-bottom: none;
+}
+
+[data-theme="dark"] .glass-table tr:hover td {
+  background: var(--bg-input) !important;
+}
+
+[data-theme="dark"] .user-avatar {
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .user-cell strong {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .status-ok {
+  background: var(--success-bg);
+  color: var(--success-text);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .status-late {
+  background: var(--error-bg);
+  color: var(--error-text);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .action-btn {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .action-btn:hover {
+  color: var(--primary);
+  transform: scale(1.08);
+}
+
+[data-theme="dark"] .ocorr-registrador {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .badge-area {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .reserva-pessoa {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .reserva-unidade {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .tabela-reservas-isolada tr.no-reservas {
+  background: transparent !important;
+}
+
+[data-theme="dark"] .tabela-reservas-isolada tr.no-reservas td {
+  background: transparent !important;
+}
+
+[data-theme="dark"] .td-titulo {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .td-texto {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .td-destaque {
+  color: var(--text-main) !important;
+}
+
+/* ============ 8. MODAIS ============ */
+[data-theme="dark"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+[data-theme="dark"] .modal-glass {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-glass) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    var(--shadow-glass),
+    0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .modal-header h3 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .close-modal,
+[data-theme="dark"] .close-modal-reserva {
+  background: var(--bg-input);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .close-modal:hover,
+[data-theme="dark"] .close-modal-reserva:hover {
+  background: var(--bg-input-focus);
+  color: var(--text-main);
+  transform: scale(1.1);
+}
+
+/* ============ 9. INPUTS E FORMS ============ */
+[data-theme="dark"] .input-wrapper,
+[data-theme="dark"] .glass-select {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-glass) !important;
+}
+
+[data-theme="dark"] .input-wrapper input,
+[data-theme="dark"] .glass-select,
+[data-theme="dark"] textarea {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .input-wrapper i {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .input-wrapper:focus-within,
+[data-theme="dark"] .glass-select:focus {
+  background: var(--bg-input-focus) !important;
+  border-color: var(--primary) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+[data-theme="dark"] .input-wrapper:focus-within i {
+  color: var(--primary) !important;
+}
+
+[data-theme="dark"] label {
+  color: var(--text-main) !important;
+  font-weight: 600;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--text-secondary) !important;
+  opacity: 0.7;
+}
+
+/* ============ INPUT DE DATA - ÍCONE CALENDÁRIO CLARO ============ */
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="time"],
+[data-theme="dark"] input[type="datetime-local"] {
+  color: var(--text-main) !important;
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-glass) !important;
+  color-scheme: dark; /* FORÇA o popup do calendário pro dark mode */
+
+}
+
+/* Ícone do calendário em BRANCO/CLARO */
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.2);
+  cursor: pointer;
+  opacity: 1;
+}
+
+/* Ícone FontAwesome ao lado TAMBÉM em branco */
+[data-theme="dark"] .input-wrapper:has(input[type="date"]) i,
+[data-theme="dark"] .input-wrapper:has(input[type="time"]) i,
+[data-theme="dark"] .input-wrapper:has(input[type="datetime-local"]) i {
+  color: #ffffff !important;
+  opacity: 0.95;
+}
+
+[data-theme="dark"] textarea {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-glass) !important;
+}
+
+[data-theme="dark"] select option {
+  background: #1c1c1e;
+  color: #ffffff;
+}
+
+/* ============ 10. BALÃO "VOCÊ ESTÁ RESERVANDO" ============ */
+[data-theme="dark"] #modal-reserva div[style*="background: #f1f5f9"],
+[data-theme="dark"] #modal-reserva div[style*="background:#f1f5f9"],
+[data-theme="dark"] #modal-reserva div[style*="background-color: #f1f5f9"],
+[data-theme="dark"] #modal-reserva div[style*="background-color:#f1f5f9"] {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] #modal-reserva div[style*="background"] {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] #label-area-selecionada,
+[data-theme="dark"] #modal-reserva strong[style*="color: var(--primary)"] {
+  color: var(--primary) !important;
+}
+
+/* ============ 11. TEXTOS GERAIS ============ */
+[data-theme="dark"] h2,
+[data-theme="dark"] h3:not(.modal-header h3) {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] h4 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] small {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] hr {
+  border-color: var(--border-glass) !important;
+}
+
+[data-theme="dark"] p {
+  color: var(--text-main) !important;
+}
+
+/* ============ 12. MODAL CONFIGURAÇÕES ============ */
+[data-theme="dark"] #modal-configuracoes h4,
+[data-theme="dark"] #modal-settings h4,
+[data-theme="dark"] #tab-security h4,
+[data-theme="dark"] .sessions-area h4 {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] #modal-configuracoes p,
+[data-theme="dark"] #modal-settings p,
+[data-theme="dark"] #tab-security p,
+[data-theme="dark"] .sessions-area p {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] #modal-configuracoes small,
+[data-theme="dark"] .profile-edit-header small {
+  color: var(--text-secondary) !important;
+}
+
+/* ============ 13. NOTIFICAÇÕES DROPDOWN ============ */
+[data-theme="dark"] .notifications-dropdown {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-glass) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    var(--shadow-glass);
+}
+
+[data-theme="dark"] .notif-header {
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+[data-theme="dark"] .notif-item:hover {
+  background: var(--bg-input) !important;
+}
+
+[data-theme="dark"] .notif-icon {
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .bg-notif-blue {
+  background: linear-gradient(135deg, #60a5fa, var(--primary));
+}
+
+[data-theme="dark"] .bg-notif-purple {
+  background: linear-gradient(135deg, #c084fc, #9333ea);
+}
+
+[data-theme="dark"] .bg-notif-green {
+  background: linear-gradient(135deg, #4ade80, #16a34a);
+}
+
+[data-theme="dark"] .bg-notif-orange {
+  background: linear-gradient(135deg, #fb923c, #ea580c);
+}
+
+[data-theme="dark"] .notif-title {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .notif-desc {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .notif-time {
+  color: var(--text-secondary);
+}
+
+/* ============ 14. TOASTS ============ */
+[data-theme="dark"] .toast {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass) !important;
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .toast-title {
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .toast-msg {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .toast-close {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .toast-close:hover {
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .toast.success .toast-icon-box {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+[data-theme="dark"] .toast.error .toast-icon-box {
+  background: var(--error-bg);
+  color: var(--error-text);
+}
+
+[data-theme="dark"] .toast.info .toast-icon-box {
+  background: rgba(37, 99, 235, 0.15);
+  color: var(--primary);
+}
+
+/* ============ 15. BOTÕES ============ */
+[data-theme="dark"] .btn-primary {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+}
+
+[data-theme="dark"] .btn-primary:hover {
+  background: var(--primary-hover) !important;
+  box-shadow: 0 8px 15px rgba(37, 99, 235, 0.4) !important;
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .btn-outline {
+  background: transparent !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-main) !important;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .btn-outline:hover {
+  background: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border-color: var(--primary) !important;
+}
+
+/* BOTÃO VERMELHO EXCLUIR */
+[data-theme="dark"] #modal-confirm-delete button.btn-primary,
+[data-theme="dark"] #modal-confirm-delete-reserva button.btn-primary,
+[data-theme="dark"] #modal-confirm-delete-ocorrencia button.btn-primary,
+[data-theme="dark"] button.btn-primary[onclick*="confirmarExclusao"] {
+  background: #ef4444 !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+}
+
+[data-theme="dark"] #modal-confirm-delete button.btn-primary:hover,
+[data-theme="dark"] #modal-confirm-delete-reserva button.btn-primary:hover,
+[data-theme="dark"] #modal-confirm-delete-ocorrencia button.btn-primary:hover {
+  background: #dc2626 !important;
+  box-shadow: 0 8px 15px rgba(239, 68, 68, 0.4) !important;
+}
+
+[data-theme="dark"] #form-config-senha button[type="submit"] {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* ============ 16. SKELETON LOADING ============ */
+[data-theme="dark"] .skeleton {
+  background-color: var(--bg-input);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+[data-theme="dark"] .skeleton-avatar {
+  background-color: var(--bg-input);
+}
+
+/* ============ 17. MOBILE - CARDS ============ */
+@media (max-width: 768px) {
+  [data-theme="dark"] .table-container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  [data-theme="dark"] .tabela-moradores tr,
+  [data-theme="dark"] .tabela-ocorrencias tr,
+  [data-theme="dark"] .tabela-reservas-isolada tr,
+  [data-theme="dark"] .tabela-caixa-extrato tr {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass) !important;
+    box-shadow: var(--shadow-glass);
+  }
+
+  [data-theme="dark"] .tabela-moradores td,
+  [data-theme="dark"] .tabela-ocorrencias td,
+  [data-theme="dark"] .tabela-reservas-isolada td,
+  [data-theme="dark"] .tabela-caixa-extrato td {
+    color: var(--text-main) !important;
+    border-bottom: 1px solid var(--border-glass) !important;
+    padding: 12px 0 !important;
+  }
+
+  [data-theme="dark"] .tabela-moradores td:last-child,
+  [data-theme="dark"] .tabela-ocorrencias td:last-child,
+  [data-theme="dark"] .tabela-reservas-isolada td:last-child,
+  [data-theme="dark"] .tabela-caixa-extrato td:last-child {
+    border-bottom: none !important;
+  }
+
+  [data-theme="dark"] .tabela-moradores td:first-child,
+  [data-theme="dark"] .tabela-ocorrencias td:first-child,
+  [data-theme="dark"] .tabela-reservas-isolada td:first-child,
+  [data-theme="dark"] .tabela-caixa-extrato td:first-child {
+    border-bottom: 1px solid var(--border-glass) !important;
+    padding-bottom: 16px !important;
+    margin-bottom: 8px !important;
+  }
+
+  [data-theme="dark"] td::before {
+    color: var(--text-secondary) !important;
+    font-weight: 600;
+  }
+
+  [data-theme="dark"] .status-ok {
+    background: var(--success-bg) !important;
+    color: var(--success-text) !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(48, 209, 88, 0.2);
+  }
+
+  [data-theme="dark"] .status-late {
+    background: var(--error-bg) !important;
+    color: var(--error-text) !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(255, 69, 58, 0.2);
+  }
+
+  [data-theme="dark"] .td-acao .action-btn {
+    color: var(--text-main);
+    background: var(--bg-input);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  [data-theme="dark"] .td-acao .action-btn:hover {
+    color: var(--primary);
+    background: var(--bg-input-focus);
+  }
+
+  [data-theme="dark"] .user-cell .avatar-circle {
+    border: 1px solid var(--border-glass);
+  }
+}
+
+/* ============ 18. TABLET ============ */
+@media (max-width: 1024px) {
+  [data-theme="dark"] .sidebar,
+  [data-theme="dark"] .stat-card,
+  [data-theme="dark"] .notifications-dropdown {
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+  }
+}
+
+/* ============ 19. LOW-PERFORMANCE ============ */
+[data-theme="dark"].low-performance .kpi-card,
+[data-theme="dark"].low-performance .activity-card,
+[data-theme="dark"].low-performance .modal-glass,
+[data-theme="dark"].low-performance .notifications-dropdown {
+  background: rgba(28, 28, 30, 0.98) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ==========================================================================
+   CORREÇÕES MODO CLARO
+========================================================================== */
+
+[data-theme="light"] .tabela-reservas-isolada tr.no-reservas {
+  background: transparent !important;
+}
+
+[data-theme="light"] .tabela-reservas-isolada tr.no-reservas td {
+  background: transparent !important;
+}
+
+/* ==========================================================================
+   CORREÇÕES MOBILE - "NENHUMA RESERVA" + BOTÃO CANCELAR
+========================================================================== */
+
+/* ============ MOBILE - CARD "NENHUMA RESERVA FUTURA" PADRONIZADO ============ */
+@media (max-width: 768px) {
+  /* MODO CLARO - Card "nenhuma reserva" igual aos outros cards */
+  [data-theme="light"] .tabela-reservas-isolada tr.no-reservas {
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+  }
+
+  [data-theme="light"] .tabela-reservas-isolada tr.no-reservas td {
+    background: transparent !important;
+  }
+
+  /* MODO ESCURO - Card "nenhuma reserva" igual aos outros cards */
+  [data-theme="dark"] .tabela-reservas-isolada tr.no-reservas {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass) !important;
+    box-shadow: var(--shadow-glass);
+  }
+
+  [data-theme="dark"] .tabela-reservas-isolada tr.no-reservas td {
+    background: transparent !important;
+  }
+}
+
+/* ============ BOTÃO CANCELAR (.btn-outline) MOBILE - MESMA COR DO DESKTOP ============ */
+@media (max-width: 480px) {
+  /* Força a mesma cor e opacidade do desktop */
+  [data-theme="dark"] .modal-footer .btn-outline,
+  [data-theme="dark"] #modal-confirm-delete button.btn-outline,
+  [data-theme="dark"] #modal-confirm-delete-reserva button.btn-outline,
+  [data-theme="dark"] #modal-confirm-delete-ocorrencia button.btn-outline,
+  [data-theme="dark"] button.btn-outline {
+    background: transparent !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #cbd5e1 !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+  }
+
+  [data-theme="dark"] .modal-footer .btn-outline:hover,
+  [data-theme="dark"] #modal-confirm-delete button.btn-outline:hover,
+  [data-theme="dark"] #modal-confirm-delete-reserva button.btn-outline:hover,
+  [data-theme="dark"] #modal-confirm-delete-ocorrencia button.btn-outline:hover,
+  [data-theme="dark"] button.btn-outline:hover {
+    background: rgba(84, 84, 88, 0.15) !important;
+    color: #e2e8f0 !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  /* Modo claro também */
+  [data-theme="light"] .modal-footer .btn-outline,
+  [data-theme="light"] #modal-confirm-delete button.btn-outline,
+  [data-theme="light"] #modal-confirm-delete-reserva button.btn-outline,
+  [data-theme="light"] #modal-confirm-delete-ocorrencia button.btn-outline,
+  [data-theme="light"] button.btn-outline {
+    background: transparent !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+  }
+
+  [data-theme="light"] .modal-footer .btn-outline:hover,
+  [data-theme="light"] #modal-confirm-delete button.btn-outline:hover,
+  [data-theme="light"] #modal-confirm-delete-reserva button.btn-outline:hover,
+  [data-theme="light"] #modal-confirm-delete-ocorrencia button.btn-outline:hover,
+  [data-theme="light"] button.btn-outline:hover {
+    background: rgba(0, 0, 0, 0.03) !important;
+    color: #475569 !important;
+    border-color: #94a3b8 !important;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================================
+   MOBILE - DIVISORES ENTRE CAMPOS (IGUALANDO AO DARK MODE)
+========================================================================== */
+
+@media (max-width: 768px) {
+  /* ADICIONAR divisores entre TODOS os campos nos cards mobile */
+  .tabela-moradores td,
+  .tabela-ocorrencias td,
+  .tabela-reservas-isolada td,
+  .tabela-caixa-extrato td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    padding: 12px 0 !important; /* ATUALIZADO */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important; /* NOVO - divisor entre campos */
+    word-break: break-word;
+    color: #1e293b;
+    font-weight: 400;
+  }
+
+  /* Remover divisor do ÚLTIMO campo */
+  .tabela-moradores td:last-child,
+  .tabela-ocorrencias td:last-child,
+  .tabela-reservas-isolada td:last-child,
+  .tabela-caixa-extrato td:last-child {
+    border-bottom: none !important; /* NOVO */
+  }
+
+  /* Primeiro campo (título) - divisor mais destacado */
+  .tabela-moradores td:first-child,
+  .tabela-ocorrencias td:first-child,
+  .tabela-reservas-isolada td:first-child,
+  .tabela-caixa-extrato td:first-child {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important; /* Divisor mais escuro */
+    padding-bottom: 16px !important;
+    margin-bottom: 8px !important;
+    display: block;
+  }
+}

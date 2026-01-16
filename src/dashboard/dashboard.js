@@ -569,7 +569,7 @@ const UI = {
 
         return `
         <div class="activity-item">
-          <div class="activity-icon bg-blue"><i class="fa-solid fa-calendar-day"></i></div>
+          <div class="activity-icon bg-blue"><i class="fa-solid fa- dar-day"></i></div>
           <div class="activity-info">
             <h4>Reserva: ${Utils.safe(r.area)}</h4>
             <p>${linhaInfo}</p>
