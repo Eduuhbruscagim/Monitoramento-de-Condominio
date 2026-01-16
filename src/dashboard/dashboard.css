@@ -950,7 +950,8 @@ TABS NO MODAL DE CONFIGURAÇÕES
 
   .td-acao {
     position: absolute;
-    top: 20px;
+    /* FIX: ALINHAMENTO COM O TOPO DO CARD (24px padding + texto) */
+    top: 16px; /* Alterado de 20px para 16px */
     right: 16px;
     width: auto !important;
     padding: 0 !important;
@@ -1492,7 +1493,8 @@ TABS NO MODAL DE CONFIGURAÇÕES
 
   .tabela-reservas-isolada .td-acao {
     position: absolute;
-    top: 20px;
+    /* FIX: ALINHAMENTO COM O TOPO DO CARD (20px padding + texto) */
+    top: 12px; /* Alterado de 20px para 12px */
     right: 20px;
     width: auto;
   }
