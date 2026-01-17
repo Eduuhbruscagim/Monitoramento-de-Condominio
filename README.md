@@ -1,9 +1,6 @@
 # Monitoramento de Condomínio - Enterprise Management System
 
-![Status](https://img.shields.io/badge/Status-Production_Ready-success?style=for-the-badge)
-![Security](https://img.shields.io/badge/Security-Enterprise_Grade-shield?style=for-the-badge)
-![Platform](https://img.shields.io/badge/Platform-SaaS_%7C_Serverless-blueviolet?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+Status: 🚀 Production Ready (Security First & High Performance)
 
 > **Enterprise Overview:** Plataforma de gestão condominial *Fullstack* de alta performance, focada em segurança de dados (LGPD), automação de processos e experiência de usuário fluida (Apple-like UX).
 
@@ -13,7 +10,7 @@
 
 A arquitetura de segurança foi desenhada seguindo o princípio de *Zero Trust*. A validação de regras de negócio ocorre na camada de persistência, garantindo integridade independente da interface do cliente.
 
-* **Row Level Security (RLS):** O sistema implementa isolamento estrito de dados. Um morador jamais consegue acessar dados financeiros sensíveis ou perfis de terceiros, pois a barreira é imposta no nível do banco de dados, não apenas no Frontend.
+* **Row Level Security (RLS):** O sistema implementa isolamento estrito de dados. Um morador jamais consegue acessar dados financeiros sensíveis ou perfis de terceiros, pois a barreira é imposta no nível do banco de dados.
 * **Role-Based Access Control (RBAC):** Hierarquia de permissões granular (Dono > Síndico > Morador), onde cada nível possui escopos de leitura e escrita rigidamente definidos.
 * **Proteção contra Conflitos:** O sistema de reservas utiliza validações atômicas para impedir duplicidade de agendamentos em tempo real (*Race Conditions*), garantindo que duas pessoas não reservem a mesma área simultaneamente.
 * **Conformidade LGPD:** Ferramentas nativas para o "Direito ao Esquecimento", permitindo a exclusão segura e completa dos dados de usuários e logs de acesso.
@@ -42,7 +39,7 @@ Utilização de *WebSockets* para manter todos os painéis administrativos sincr
 | Componente | Tecnologia | Detalhes |
 | :--- | :--- | :--- |
 | **Frontend** | Vanilla JS (ES6+) | Arquitetura baseada em módulos, sem dependências de frameworks monolíticos. |
-| **Backend** | Supabase (BaaS) | Infraestrutura *Serverless* escalável. |
+| **Backend** | Supabase (BaaS) | Infraestrutura *Serverless* escalável (PostgreSQL). |
 | **Auth** | JWT & OAuth | Sistema de autenticação robusto e gerenciamento de sessões. |
 | **Assets** | WebP & Vetores | Otimização agressiva de mídia para carregamento instantâneo. |
 
