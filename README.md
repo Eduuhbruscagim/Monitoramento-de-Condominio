@@ -1,90 +1,91 @@
-# 🏢 Condomínio App - High Performance Dashboard
+# Monitoramento de Condomínio - Enterprise Management System
 
 ![Status](https://img.shields.io/badge/Status-Production_Ready-success?style=for-the-badge)
-![Tech](https://img.shields.io/badge/Stack-Vanilla_JS_%7C_Supabase-blue?style=for-the-badge)
-![Performance](https://img.shields.io/badge/Performance-Hardware_Accelerated-orange?style=for-the-badge)
+![Security](https://img.shields.io/badge/Security-Enterprise_Grade-shield?style=for-the-badge)
+![Platform](https://img.shields.io/badge/Platform-SaaS_%7C_Serverless-blueviolet?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-> **SaaS Concept:** Uma plataforma de gestão condominial *Fullstack* focada em UX Premium (Apple-Like), performance adaptativa e atualizações em tempo real.
+> **Enterprise Overview:** Plataforma de gestão condominial *Fullstack* de alta performance, focada em segurança de dados (LGPD), automação de processos e experiência de usuário fluida (Apple-like UX).
 
-![Preview do Projeto](src/imagens/Mac.webp)
+![Interface Preview](src/imagens/Mac.webp)
 
-## ⚡ Diferenciais Técnicos (Under the Hood)
+## 🛡️ Segurança e Privacidade (Security First)
 
-Este não é apenas um CRUD simples. A arquitetura foi desenhada para eliminar a necessidade de frameworks pesados (React/Vue), mantendo a reatividade e a performance no talo.
+A arquitetura de segurança foi desenhada seguindo o princípio de *Zero Trust*. A validação de regras de negócio ocorre na camada de persistência, garantindo integridade independente da interface do cliente.
 
-### 1. 🚀 Motor de Performance Adaptativo (`performance.js`)
-O sistema detecta automaticamente a capacidade do hardware do usuário:
-* Executa testes de **FPS** no carregamento.
-* Monitora núcleos de CPU e memória do dispositivo.
-* **Low-End Devices:** Desativa automaticamente filtros pesados (`backdrop-filter`, `blur`) e simplifica animações CSS para garantir 60fps constantes, mesmo em batatas.
+* **Row Level Security (RLS):** O sistema implementa isolamento estrito de dados. Um morador jamais consegue acessar dados financeiros sensíveis ou perfis de terceiros, pois a barreira é imposta no nível do banco de dados, não apenas no Frontend.
+* **Role-Based Access Control (RBAC):** Hierarquia de permissões granular (Dono > Síndico > Morador), onde cada nível possui escopos de leitura e escrita rigidamente definidos.
+* **Proteção contra Conflitos:** O sistema de reservas utiliza validações atômicas para impedir duplicidade de agendamentos em tempo real (*Race Conditions*), garantindo que duas pessoas não reservem a mesma área simultaneamente.
+* **Conformidade LGPD:** Ferramentas nativas para o "Direito ao Esquecimento", permitindo a exclusão segura e completa dos dados de usuários e logs de acesso.
 
-### 2. 🧠 Gerenciamento de Estado & Cache (Vanilla Store)
-Implementação de uma *Store* centralizada no `dashboard.js` sem dependências externas:
-* **Smart Caching:** Dados (moradores, reservas) possuem `CACHE_TTL` (Time-to-Live). O sistema só busca no banco se o cache expirar, economizando requisições (Read Ops).
-* **Otimistic UI:** A interface reage instantaneamente às ações do usuário enquanto processa o backend.
+## ⚡ Diferenciais de Engenharia
 
-### 3. 📡 Realtime via WebSockets
-Integração profunda com o **Supabase Realtime**. O Dashboard não precisa de *refresh*:
-* Novas ocorrências "pipocam" na tela de todos os admins conectados.
-* O status do Caixa é atualizado globalmente no milissegundo que uma movimentação ocorre.
+O projeto abandona frameworks pesados em favor de uma arquitetura "Vanilla" otimizada, resultando em métricas de *Lighthouse* superiores.
+
+### 1. Motor de Performance Adaptativo
+O sistema inclui um módulo de telemetria (`performance.js`) que analisa o hardware do usuário em tempo real.
+* **Dispositivos High-End:** Ativa efeitos de vidro (*Glassmorphism*), sombras dinâmicas e animações complexas.
+* **Dispositivos Low-End:** Degrada graciosamente a interface, removendo filtros custosos para manter a taxa de quadros (FPS) estável e a usabilidade fluida.
+
+### 2. Sincronização em Tempo Real
+Utilização de *WebSockets* para manter todos os painéis administrativos sincronizados.
+* Novas ocorrências e movimentações de caixa são propagadas instantaneamente para todos os administradores conectados, eliminando a necessidade de recarregar a página.
+
+### 3. UX/UI Design System
+* **Física de Interface:** As animações utilizam curvas de Bézier customizadas (`--ease-spring`) para replicar a sensação tátil de sistemas operacionais nativos.
+* **Temas Dinâmicos:** Suporte nativo a *Dark Mode* e *Light Mode* com persistência de preferências.
 
 ---
 
 ## 🛠️ Stack Tecnológica
 
-A "Tríade Web" levada ao extremo, apoiada por infraestrutura Serverless.
-
-| Camada | Tecnologia | Detalhes |
+| Componente | Tecnologia | Detalhes |
 | :--- | :--- | :--- |
-| **Frontend** | HTML5, CSS3, ES6+ | Módulos JS nativos, CSS Variables, Apple Physics Easing. |
-| **Backend** | Supabase (BaaS) | Postgres, Auth, Edge Functions, RPCs. |
-| **Segurança** | RLS (Row Level Security) | Políticas estritas no banco. Moradores veem apenas seus dados; Admins veem tudo. |
-| **Assets** | FontAwesome 6 | Ícones vetoriais otimizados. |
+| **Frontend** | Vanilla JS (ES6+) | Arquitetura baseada em módulos, sem dependências de frameworks monolíticos. |
+| **Backend** | Supabase (BaaS) | Infraestrutura *Serverless* escalável. |
+| **Auth** | JWT & OAuth | Sistema de autenticação robusto e gerenciamento de sessões. |
+| **Assets** | WebP & Vetores | Otimização agressiva de mídia para carregamento instantâneo. |
 
 ---
 
-## 💎 Features & Arquitetura Visual
+## 💎 Módulos do Sistema
 
-### Design System (Apple Physics)
-O CSS (`global.css`) utiliza curvas de Bézier customizadas (`--ease-spring`, `--ease-snappy`) para replicar a física de interfaces nativas do iOS/macOS.
-* **Glassmorphism 2.0:** Painéis com desfoque de fundo e saturação (saturate 180%) para legibilidade perfeita.
-* **Temas:** Suporte nativo a **Dark/Light Mode** com persistência em `localStorage`.
+### 📊 Gestão Financeira
+* **Livro Caixa Digital:** Interface limpa para visualização de fluxo de caixa (entradas e saídas).
+* **Transparência:** Extratos públicos simplificados para prestação de contas aos condôminos.
 
-### Módulos do Sistema
-1.  **Dashboard Financeiro:** KPIs de caixa com extrato público transparente.
-2.  **Central de Reservas:** Validação de conflito de horários direto no banco de dados.
-3.  **Livro de Ocorrências:**
-    * Fluxo: Abertura (Morador) -> Análise (Síndico) -> Resolução.
-    * Permissões granulares para exclusão.
-4.  **Gestão de Moradores:**
-    * Cadastro com verificação de unidade duplicada.
-    * Gerador automático de avatares (UI Avatars) ou upload de URL.
-    * **Secure Delete:** Função RPC para limpeza completa de dados de autenticação e perfil.
+### 📅 Central de Reservas
+* Calendário interativo para áreas comuns (Salão de Festas, Churrasqueiras, Quadras).
+* Feedback visual imediato sobre disponibilidade de datas.
+
+### 📝 Controle de Ocorrências
+* Workflow completo de zeladoria: Abertura de chamado -> Análise do Síndico -> Resolução.
+* Histórico imutável de ações para auditoria interna.
+
+### 👥 Gestão de Comunidade
+* Diretório de moradores com busca rápida por unidade.
+* Onboarding automatizado com geração de avatares e credenciais.
 
 ---
 
 ## 📂 Estrutura do Projeto
 
+A organização do código segue o padrão de separação por domínio (*Domain-Driven*), facilitando a escalabilidade.
+
 ```text
 /
 ├── src/
-│   ├── about/          # Landing Page Institucional (Dock Navigation)
-│   ├── auth/           # Fluxo Completo (Login, Register, Recovery, Magic Link)
-│   ├── dashboard/      # Core Application
-│   │   ├── dashboard.html  # Layout Modular
-│   │   ├── dashboard.js    # State Management & Business Logic
-│   │   └── theme.js        # Theme Switcher Logic
-│   ├── services/       # Camada de API (Supabase Client Singleton)
-│   ├── imagens/        # WebP Assets Otimizados
-│   ├── global.css      # Design Tokens & CSS Reset
-│   ├── index.html      # Landing Page
-│   └── performance.js  # Hardware Detection Engine
-└── README.md           # Documentação
-```
-<br>
-
-<div align="center">
-
-Developed by Eduardo Bruscagim Fullstack Engineering & Product Design
-
-</div>
+│   ├── about/              # Landing Page Institucional
+│   ├── auth/               # Módulos de Identidade (Login, Registro, Recuperação)
+│   ├── dashboard/          # Núcleo da Aplicação (SPA Logic)
+│   │   ├── dashboard.js    # Gerenciamento de Estado & Controladores
+│   │   ├── dashboard.css   # Estilização do Painel
+│   │   └── theme.js        # Logic de Temas (Dark/Light)
+│   ├── services/           # Camada de Infraestrutura (API Client)
+│   ├── imagens/            # Assets Otimizados
+│   ├── global.css          # Design Tokens & Variáveis CSS
+│   ├── index.html          # Ponto de Entrada
+│   └── performance.js      # Motor de Detecção de Hardware
+├── .gitignore
+├── LICENSE
+└── README.md
