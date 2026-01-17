@@ -1,76 +1,139 @@
-# 🏢 Condomínio App (SaaS Concept)
+🏢 Condomínio App - High Performance Dashboard
 
-![Preview do Projeto](src/imagens/Mac.webp)
+SaaS Concept: Uma plataforma de gestão condominial Fullstack focada em UX Premium (Apple-Like), performance adaptativa e atualizações em tempo real.
 
-> **Status:** 🚀 Fase 3 Concluída (Backend Serverless, Realtime & Security)
+⚡ Diferenciais Técnicos (Under the Hood)
 
-## 📜 Sobre o Projeto
+Este não é apenas um CRUD simples. A arquitetura foi desenhada para eliminar a necessidade de frameworks pesados (React/Vue), mantendo a reatividade e a performance no talo.
 
-O **Condomínio App** é uma plataforma web *Fullstack* desenvolvida para modernizar a gestão de condomínios residenciais. 
+1. 🚀 Motor de Performance Adaptativo (performance.js)
 
-Diferente de sistemas administrativos tradicionais, este projeto une uma **Interface Premium (Apple-Like)** com uma **Arquitetura Serverless** robusta, garantindo segurança, performance e atualizações em tempo real.
+O sistema detecta automaticamente a capacidade do hardware do usuário:
 
-O sistema opera como um **SaaS (Software as a Service)** funcional, com controle total de acesso via RLS (Row Level Security), gestão financeira e comunicação instantânea entre síndico e moradores.
+Executa testes de FPS no carregamento.
 
-## ✨ Destaques da Interface (Premium UI)
+Monitora núcleos de CPU e memória do dispositivo.
 
-O front-end foi construído sem frameworks de UI, focando em CSS puro de alta performance:
+Low-End Devices: Desativa automaticamente filtros pesados (backdrop-filter, blur) e simplifica animações CSS para garantir 60fps constantes, mesmo em batatas.
 
-* **💎 Glassmorphism Real:** Uso intensivo de `backdrop-filter` para criar camadas de vidro fosco e profundidade.
-* **📱 Dashboard Mobile-First:** Tabelas que se transformam em *Cards* responsivos e menus adaptáveis.
-* **🎨 Design System:** Paleta de cores consistente, tipografia *Plus Jakarta Sans* e micro-interações refinadas.
+2. 🧠 Gerenciamento de Estado & Cache (Vanilla Store)
 
-## ⚙️ Arquitetura & Backend (Supabase)
+Implementação de uma Store centralizada no dashboard.js sem dependências externas:
 
-O projeto deixou de ser apenas visual e agora conta com um backend poderoso:
+Smart Caching: Dados (moradores, reservas) possuem CACHE_TTL (Time-to-Live). O sistema só busca no banco se o cache expirar, economizando requisições (Read Ops).
 
-* **🔥 Database (PostgreSQL):** Dados relacionais estruturados.
-* **🛡️ Segurança (RLS):** Políticas de acesso a nível de linha (Ex: Morador só vê o que é permitido; Síndico vê tudo).
-* **📡 Realtime:** O Dashboard atualiza instantaneamente (sem refresh) quando novas ocorrências ou reservas são criadas.
-* **🔐 Autenticação:** Fluxo completo de Login, Cadastro e Recuperação de Senha (Magic Links).
+Otimistic UI: A interface reage instantaneamente às ações do usuário enquanto processa o backend.
 
-## 🚀 Funcionalidades Ativas
+3. 📡 Realtime via WebSockets
 
-1.  **Dashboard Inteligente:** KPIs de saldo, unidades e ocorrências atualizados em tempo real.
-2.  **Gestão de Ocorrências:**
-    * Moradores abrem chamados.
-    * Síndicos visualizam detalhes e gerenciam status.
-    * *Permissões:* Apenas Admins/Donos podem excluir registros.
-3.  **Sistema de Reservas:**
-    * Calendário visual com bloqueio automático de datas já ocupadas.
-    * Validação anti-conflito direto no banco de dados.
-4.  **Controle Financeiro (Caixa):**
-    * Extrato público para transparência.
-    * Saldo protegido e gestão de entradas/saídas restrita a administradores.
-5.  **Diretório de Moradores:**
-    * Listagem completa com busca e gestão de status (Em dia / Inadimplente).
+Integração profunda com o Supabase Realtime. O Dashboard não precisa de refresh:
 
-## 🛠️ Stack Tecnológica
+Novas ocorrências "pipocam" na tela de todos os admins conectados.
 
-A "Tríade Web" moderna:
+O status do Caixa é atualizado globalmente no milissegundo que uma movimentação ocorre.
 
-* **Frontend:** HTML5 Semântico, CSS3 (Variables, Grid, Flex), JavaScript (ES6+ Modules).
-* **Backend as a Service:** Supabase (Postgres, Auth, Storage, Edge Functions).
-* **Assets:** FontAwesome 6, Google Fonts.
+🛠️ Stack Tecnológica
 
-## 📂 Estrutura do Projeto
+A "Tríade Web" levada ao extremo, apoiada por infraestrutura Serverless.
 
-```text
+Camada
+
+Tecnologia
+
+Detalhes
+
+Frontend
+
+HTML5, CSS3, ES6+
+
+Módulos JS nativos, CSS Variables, Apple Physics Easing.
+
+Backend
+
+Supabase (BaaS)
+
+Postgres, Auth, Edge Functions, RPCs.
+
+Segurança
+
+RLS (Row Level Security)
+
+Políticas estritas no banco. Moradores veem apenas seus dados; Admins veem tudo.
+
+Assets
+
+FontAwesome 6
+
+Ícones vetoriais otimizados.
+
+💎 Features & Arquitetura Visual
+
+Design System (Apple Physics)
+
+O CSS (global.css) utiliza curvas de Bézier customizadas (--ease-spring, --ease-snappy) para replicar a física de interfaces nativas do iOS/macOS.
+
+Glassmorphism 2.0: Painéis com desfoque de fundo e saturação (saturate 180%) para legibilidade perfeita.
+
+Temas: Suporte nativo a Dark/Light Mode com persistência em localStorage.
+
+Módulos do Sistema
+
+Dashboard Financeiro: KPIs de caixa com extrato público transparente.
+
+Central de Reservas: Validação de conflito de horários direto no banco de dados.
+
+Livro de Ocorrências:
+
+Fluxo: Abertura (Morador) -> Análise (Síndico) -> Resolução.
+
+Permissões granulares para exclusão.
+
+Gestão de Moradores:
+
+Cadastro com verificação de unidade duplicada.
+
+Gerador automático de avatares (UI Avatars) ou upload de URL.
+
+Secure Delete: Função RPC para limpeza completa de dados de autenticação e perfil.
+
+📂 Estrutura do Projeto
+
 /
 ├── src/
-│   ├── about/          # Página Institucional
-│   ├── auth/           # Fluxo de Autenticação Completo
-│   ├── dashboard/      # Aplicação Principal (Lógica + UI)
-│   ├── services/       # Camada de Integração (Supabase Client)
-│   ├── imagens/        # Assets Otimizados
-│   ├── global.css      # Design System
-│   └── index.html      # Landing Page
+│   ├── about/          # Landing Page Institucional (Dock Navigation)
+│   ├── auth/           # Fluxo Completo (Login, Register, Recovery, Magic Link)
+│   ├── dashboard/      # Core Application
+│   │   ├── dashboard.html  # Layout Modular
+│   │   ├── dashboard.js    # State Management & Business Logic
+│   │   └── theme.js        # Theme Switcher Logic
+│   ├── services/       # Camada de API (Supabase Client Singleton)
+│   ├── imagens/        # WebP Assets Otimizados
+│   ├── global.css      # Design Tokens & CSS Reset
+│   ├── index.html      # Landing Page
+│   └── performance.js  # Hardware Detection Engine
 └── README.md           # Documentação
-```
+
+
+🚀 Como Rodar
+
+Este projeto utiliza módulos ES6, portanto precisa de um servidor HTTP local (não abra o arquivo direto pelo navegador).
+
+Clone o repositório:
+
+git clone [https://github.com/seu-usuario/Monitoramento-de-Condominio.git](https://github.com/seu-usuario/Monitoramento-de-Condominio.git)
+
+
+Instale uma extensão de Live Server (VS Code) ou use Python/Node:
+
+# Exemplo com Python
+python -m http.server 8000
+
+
+Acesse:
+Abra http://localhost:8000/src/index.html
+
 <div align="center">
 
-Idealizado e Desenvolvido por Eduardo Bruscagim
-
-Product Design • Frontend Engineering • Backend Architecture
+Developed by Eduardo Bruscagim Fullstack Engineering & Product Design
 
 </div>
