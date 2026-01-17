@@ -10,7 +10,7 @@
 A arquitetura de segurança foi desenhada seguindo o princípio de *Zero Trust*. A validação de regras de negócio ocorre na camada de persistência, garantindo integridade independente da interface do cliente.
 
 * **Row Level Security (RLS):** O sistema implementa isolamento estrito de dados. Um morador jamais consegue acessar dados financeiros sensíveis ou perfis de terceiros, pois a barreira é imposta no nível do banco de dados.
-* **Role-Based Access Control (RBAC):** Hierarquia de permissões granular (Dono > Síndico > Morador), onde cada nível possui escopos de leitura e escrita rigidamente definidos.
+* **Role-Based Access Control (RBAC):** Hierarquia de permissões granular (Síndico > Morador), onde cada nível possui escopos de leitura e escrita rigidamente definidos.
 * **Proteção contra Conflitos:** O sistema de reservas utiliza validações atômicas para impedir duplicidade de agendamentos em tempo real (*Race Conditions*), garantindo que duas pessoas não reservem a mesma área simultaneamente.
 * **Conformidade LGPD:** Ferramentas nativas para o "Direito ao Esquecimento", permitindo a exclusão segura e completa dos dados de usuários e logs de acesso.
 
