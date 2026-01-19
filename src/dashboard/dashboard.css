@@ -3893,3 +3893,12 @@ input:-webkit-autofill:active {
   box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
   color: var(--text-main) !important;
 }
+
+
+/* Modo Escuro - balão de fundo mais visível */
+[data-theme="dark"] .stat-change.text-light {
+  background: rgba(148, 163, 184, 0.097); /* Cor mais clara e visível no dark */
+  color: var(--text-secondary);
+  border: 1px solid rgba(148, 163, 184, 0.1); /* Borda sutil para destacar mais */
+}
+
