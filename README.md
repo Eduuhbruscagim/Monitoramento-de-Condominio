@@ -1,87 +1,164 @@
-# Monitoramento de Condomínio - Enterprise Management System
+# 🏢 Sistema de Monitoramento de Condomínios
 
+Sistema completo de gestão de condomínios desenvolvido como TCC, utilizando tecnologias modernas e boas práticas de desenvolvimento.
 
-> **Enterprise Overview:** Plataforma de gestão condominial *Fullstack* de alta performance, focada em segurança de dados (LGPD), automação de processos e experiência de usuário fluida (Apple-like UX).
+## ✨ Funcionalidades
 
-![Interface Preview](src/imagens/Mac.webp)
+- 🔐 **Autenticação segura** com Supabase Auth
+- 📅 **Gestão de Reservas** de áreas comuns
+- ⚠️ **Registro de Ocorrências** com sistema de status
+- 💰 **Controle de Caixa** com histórico de movimentações
+- 👥 **Administração de Moradores** com perfis e permissões
+- 🔔 **Sistema de Notificações** em tempo real
+- 🎨 **Interface moderna** com Glassmorphism
+- ⚡ **Real-time** via Supabase Realtime
 
-## 🛡️ Segurança e Privacidade (Security First)
+## 🛠️ Tecnologias
 
-A arquitetura de segurança foi desenhada seguindo o princípio de *Zero Trust*. A validação de regras de negócio ocorre na camada de persistência, garantindo integridade independente da interface do cliente.
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **Backend**: Supabase (PostgreSQL + Auth + Realtime)
+- **Build Tool**: Vite
+- **Estilização**: CSS customizado com design system
+- **Ícones**: Font Awesome 6
+- **Tipografia**: Plus Jakarta Sans
 
-* **Row Level Security (RLS):** O sistema implementa isolamento estrito de dados. Um morador jamais consegue acessar dados financeiros sensíveis ou perfis de terceiros, pois a barreira é imposta no nível do banco de dados.
-* **Role-Based Access Control (RBAC):** Hierarquia de permissões granular (Síndico > Morador), onde cada nível possui escopos de leitura e escrita rigidamente definidos.
-* **Proteção contra Conflitos:** O sistema de reservas utiliza validações para impedir duplicidade de agendamentos em tempo real (*Race Conditions*), garantindo que duas pessoas não reservem a mesma área simultaneamente.
-* **Conformidade LGPD:** Ferramentas nativas para o "Direito ao Esquecimento", permitindo a exclusão segura e completa dos dados de usuários e logs de acesso.
+## 🚀 Como Rodar o Projeto
 
-## ⚡ Diferenciais de Engenharia
+### Pré-requisitos
 
-O projeto abandona frameworks pesados em favor de uma arquitetura "Vanilla" otimizada, resultando em desempenho mais leve.
+- Node.js 18+ instalado
+- Conta no Supabase
 
-### 1. Motor de Performance Adaptativo
-O sistema inclui um módulo de telemetria (`performance.js`) que analisa o hardware do usuário em tempo real para aplicar os modos de desempenho.
-* **Dispositivos High-End:** Ativa efeitos de vidro (*Glassmorphism*), sombras dinâmicas e animações complexas.
-* **Dispositivos Low-End:** Degrada graciosamente a interface, removendo filtros pesados para manter a taxa de quadros (FPS) estável e a usabilidade fluida.
+### 1️⃣ Instalação
 
-### 2. Sincronização em Tempo Real
-Utilização de *WebSockets* para manter todos os painéis administrativos sincronizados.
-* Novas ocorrências e movimentações de caixa são mostradas instantaneamente para todos os administradores conectados, eliminando a necessidade de recarregar a página.
+```bash
+# Clone o repositório
+git clone https://github.com/Eduuhbruscagim/Monitoramento-de-Condominio.git
+cd Monitoramento-de-Condominio
 
-### 3. UX/UI Design System
-* **Física de Interface:** As animações utilizam curvas de Bézier customizadas (`--ease-spring`) para ter animações fluidas estilo Apple.
-* **Temas Dinâmicos:** Suporte nativo a *Dark Mode* e *Light Mode*.
+# Instale as dependências
+npm install
+```
 
----
+### 2️⃣ Configuração
 
-## 🛠️ Stack Tecnológica
+1. Copie o arquivo de exemplo:
+```bash
+cp .env.example .env
+```
 
-| Componente | Tecnologia | Detalhes |
-| :--- | :--- | :--- |
-| **Frontend** | Vanilla JS (ES6+) | Arquitetura baseada em módulos, sem dependências de frameworks monolíticos. |
-| **Backend** | Supabase (BaaS) | Infraestrutura *Serverless* escalável (PostgreSQL). |
-| **Auth** | JWT & OAuth | Sistema de autenticação bem robusto e gerenciamento de sessões. |
-| **Assets** | WebP & Vetores | Otimização de mídia para carregamento instantâneo. |
+2. Abra o arquivo `.env` e preencha com suas credenciais do Supabase:
+```env
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_KEY=sua-chave-anonima-aqui
+```
 
----
+**Onde encontrar as credenciais:**
+1. Acesse [Supabase Dashboard](https://supabase.com/dashboard)
+2. Selecione seu projeto
+3. Vá em **Settings** → **API**
+4. Copie:
+   - **Project URL** → `VITE_SUPABASE_URL`
+   - **anon public key** → `VITE_SUPABASE_KEY`
 
-## 💎 Módulos do Sistema
+### 3️⃣ Rodar em Desenvolvimento
 
-### 📊 Gestão Financeira
-* **Caixa Digital:** Interface limpa para visualização de fluxo de caixa (entradas e saídas).
-* **Transparência:** Extratos públicos simplificados para prestação de contas aos condôminos.
+```bash
+npm run dev
+```
 
-### 📅 Central de Reservas
-* Seção de reservas para áreas comuns, afim de evitar lotação e melhorar organização (Salão de Festas, Churrasqueiras, Quadras).
-* Feedback visual sobre disponibilidade de datas.
+O projeto vai abrir automaticamente em `http://localhost:5173`
 
-### 📝 Controle de Ocorrências
-* Seção de ocorrências: Abertura de chamado -> Análise do Síndico -> Resolução.
-* Somente administradores podem ver todas as ocorrências
+✅ **Hot Module Replacement ativado** - suas mudanças aparecerão instantaneamente!
 
-### 👥 Gestão de Comunidade
-* Seção de moradores para ver todos os residentes do seu condominío.
-* Seção automatizada com geração de avatares e dados puxados direto do registro.
+### 4️⃣ Build para Produção
 
----
+```bash
+npm run build
+```
 
-## 📂 Estrutura do Projeto
+Os arquivos otimizados serão gerados na pasta `dist/`
 
-A organização do código segue o padrão de separação por domínio (*Domain-Driven*), facilitando a escalabilidade.
+### 5️⃣ Preview do Build
 
-```text
-/
+```bash
+npm run preview
+```
+
+Vizualiza o build de produção localmente em `http://localhost:4173`
+
+## 📁 Estrutura do Projeto
+
+```
+Monitoramento-de-Condominio/
 ├── src/
-│   ├── about/              # Landing Page Institucional
-│   ├── auth/               # Módulos de Identidade (Login, Registro, Recuperação)
-│   ├── dashboard/          # Núcleo da Aplicação (SPA Logic)
-│   │   ├── dashboard.js    # Gerenciamento de Estado & Controladores
-│   │   ├── dashboard.css   # Estilização do Painel
-│   │   └── theme.js        # Logica de Temas (Dark/Light)
-│   ├── services/           # Camada de Infraestrutura (API Client)
-│   ├── imagens/            # Assets Otimizados
-│   ├── global.css          # Design Tokens & Variáveis CSS
-│   ├── index.html          # Ponto de Entrada
-│   └── performance.js      # Motor de Detecção de Hardware
-├── .gitignore
-├── LICENSE
-└── README.md
+│   ├── auth/
+│   │   ├── login.html          # Página de login
+│   │   └── login.js            # Lógica de autenticação
+│   ├── dashboard/
+│   │   ├── dashboard.html      # Dashboard principal
+│   │   └── dashboard.js        # Lógica do dashboard
+│   ├── services/
+│   │   └── supabase.js         # Configuração do Supabase
+│   ├── global.css             # Estilos globais
+│   └── performance.js         # Otimizações de performance
+├── dist/                      # Build de produção (gerado)
+├── node_modules/              # Dependências (ignorado no git)
+├── .env                       # Suas credenciais (ignorado no git)
+├── .env.example               # Template de credenciais
+├── .gitignore                 # Arquivos ignorados
+├── package.json               # Dependências e scripts
+├── vite.config.js             # Configuração do Vite
+└── README.md                  # Este arquivo
+```
+
+## 🔒 Segurança
+
+- ✅ Credenciais em variáveis de ambiente
+- ✅ `.env` no `.gitignore` (nunca commitado)
+- ✅ XSS protection com sanitização de inputs
+- ✅ Autenticação via Supabase Auth
+- ✅ Row Level Security (RLS) no banco de dados
+
+## 🚀 Deploy
+
+### Vercel
+
+1. Instale a Vercel CLI:
+```bash
+npm i -g vercel
+```
+
+2. Faça deploy:
+```bash
+vercel
+```
+
+3. Configure as variáveis de ambiente no dashboard da Vercel:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_KEY`
+
+### Netlify
+
+1. Build localmente:
+```bash
+npm run build
+```
+
+2. Faça deploy da pasta `dist/`
+
+3. Configure as variáveis de ambiente no dashboard da Netlify
+
+## 👨‍💻 Autor
+
+**Eduardo Bruscagim**
+- GitHub: [@Eduuhbruscagim](https://github.com/Eduuhbruscagim)
+- Projeto: TCC 2025
+
+## 📝 Licença
+
+MIT License - Sinta-se livre para usar este projeto como referência!
+
+---
+
+❤️ Desenvolvido com dedicação para o TCC
