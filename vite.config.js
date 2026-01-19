@@ -22,6 +22,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       input: {
+        main: resolve(__dirname, 'src/index.html'),
         login: resolve(__dirname, 'src/auth/login.html'),
         dashboard: resolve(__dirname, 'src/dashboard/dashboard.html'),
       },
@@ -35,7 +36,7 @@ export default defineConfig({
   
   server: {
     port: 5173,
-    open: '/auth/login.html',
+    open: '/index.html',
     
     // Hot Module Replacement
     hmr: {
