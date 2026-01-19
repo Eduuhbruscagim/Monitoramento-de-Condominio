@@ -1,0 +1,452 @@
+/* ==========================================================================
+LOGIN.CSS - ESTILO GLOBAL DE AUTENTICAÇÃO
+Versão: Apple Physics (Clean Grey Borders - FIXED)
+========================================================================== */
+
+/* --------------------------------------------------------------------------
+2. ESTRUTURA DA PÁGINA
+-------------------------------------------------------------------------- */
+.login-page {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--text-main);
+  }
+
+  /* --------------------------------------------------------------------------
+  3. O CARD DE VIDRO
+  -------------------------------------------------------------------------- */
+  .login-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-glass);
+    padding: 48px 40px;
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: var(--shadow-glass);
+    opacity: 0;
+    transform: translateY(30px) scale(0.96);
+    animation: loginEnter 0.8s var(--ease-spring) forwards;
+  }
+
+  @keyframes loginEnter {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* --------------------------------------------------------------------------
+  4. CABEÇALHO
+  -------------------------------------------------------------------------- */
+  .login-header {
+    margin-bottom: 32px;
+  }
+
+  .login-header img {
+    height: 56px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
+    animation: floatLogo 1s var(--ease-spring) 0.1s forwards;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  @keyframes floatLogo {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .login-header h2 {
+    color: var(--text-main);
+    font-size: 1.75rem;
+    margin-bottom: 8px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .login-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  /* --------------------------------------------------------------------------
+  5. FORMULÁRIO (Inputs Clean & Arredondados) - FIXED
+  -------------------------------------------------------------------------- */
+  .input-group {
+    margin-bottom: 24px;
+    text-align: left;
+  }
+
+  .input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 0.85rem;
+    margin-left: 4px;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+
+  .input-wrapper i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* INPUTS & SELECTS */
+  .input-wrapper input,
+  .input-wrapper select {
+    width: 100%;
+    padding: 14px 14px 14px 48px;
+    background: var(--bg-input);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    /* 🔧 FIX: Transition suave SEM transform */
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  /* Dark Mode Border */
+  [data-theme="dark"] .input-wrapper input,
+  [data-theme="dark"] .input-wrapper select {
+    border-color: rgba(255,255,255, 0.15);
+  }
+
+  .input-wrapper select {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 1em;
+    padding-right: 40px;
+  }
+
+  /* --- ESTADO DE FOCO (CLEAN GREY + LEVITAÇÃO) --- */
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+  background: var(--bg-input-focus);
+  /* 🎯 Borda original */
+  border-color: #cbd5e1;
+  /* 💫 Sombra original */
+  box-shadow: 0 0 0 3px rgba(203, 213, 225, 0.15);
+  outline: none;
+  /* ✨ Levitação suave para feedback */
+  transform: translateY(-1px) !important;
+  transition: all 0.3s var(--ease-spring);
+}
+
+/* Dark Mode Focus */
+[data-theme="dark"] .input-wrapper input:focus,
+[data-theme="dark"] .input-wrapper select:focus {
+  border-color: rgba(255,255,255, 0.3);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px) !important;
+}
+
+/* 🔒 FIX: Impede duplicação de borda do global.css */
+.login-page .input-wrapper:focus-within {
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* Ícone escurece no foco */
+.input-wrapper input:focus + i,
+.input-wrapper select:focus + i {
+  color: var(--text-main);
+}
+
+
+  /* --------------------------------------------------------------------------
+  6. AÇÕES & BOTÕES
+  -------------------------------------------------------------------------- */
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    font-size: 0.9rem;
+  }
+
+  .remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: transform 0.1s;
+  }
+
+  .remember-me:active { transform: scale(0.98); }
+
+  .forgot-pass {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .forgot-pass:hover { color: var(--primary-hover); }
+
+  /* BOTÃO PRINCIPAL */
+  .btn-full {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: none;
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    transition:
+      transform 0.2s var(--ease-snappy),
+      background-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  .btn-full:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4);
+  }
+
+  .btn-full:active {
+    transform: scale(0.96);
+  }
+
+  /* --------------------------------------------------------------------------
+  7. RODAPÉ & MENSAGENS
+  -------------------------------------------------------------------------- */
+  .register-link {
+    margin-top: 24px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .register-link a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+    transition: opacity 0.2s;
+  }
+
+  .register-link a:hover { opacity: 0.8; }
+
+  .back-link {
+    margin-top: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+  }
+
+  .back-link:hover {
+    color: var(--text-main);
+    background: var(--bg-input);
+    transform: translateX(-2px);
+  }
+
+  /* Status Messages */
+  .status-msg {
+    display: none;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    animation: msgPop 0.4s var(--ease-spring) forwards;
+  }
+
+  @keyframes msgPop {
+    from { opacity: 0; transform: scale(0.9) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .status-msg.error {
+    background: var(--error-bg);
+    color: var(--error-text);
+    border: 1px solid var(--error-bg);
+  }
+
+  .status-msg.success {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid var(--success-bg);
+  }
+
+  /* Mobile Fixes */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  @media (max-width: 480px) {
+    .login-card { padding: 32px 20px; }
+    .form-row { grid-template-columns: 1fr; gap: 0; }
+    .login-header h2 { font-size: 1.5rem; }
+  }
+
+  /* ==========================================================================
+OTIMIZAÇÃO DE PERFORMANCE - LOGIN
+========================================================================== */
+
+/* 🎯 Will-Change para elementos do login */
+.login-card,
+.input-wrapper input,
+.input-wrapper select,
+.btn-full,
+.back-link {
+  will-change: transform, opacity;
+}
+
+/* Remove will-change após hover */
+.btn-full:hover,
+.back-link:hover {
+  will-change: auto;
+}
+
+/* 💻 Fallback para low-performance no login */
+.low-performance .login-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.low-performance[data-theme="dark"] .login-card {
+  background: rgba(30, 41, 59, 0.98) !important;
+}
+
+/* Desabilita animações de entrada em low-mode */
+.low-performance .login-card {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.low-performance .login-header img {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+
+/* ==========================================================================
+🔧 FIX: AUTOCOMPLETE DO NAVEGADOR (Chrome, Edge, Safari, Firefox)
+Força o tema correto mesmo quando o navegador preenche automaticamente
+========================================================================== */
+
+/* --- LIGHT MODE: Autocomplete com fundo claro --- */
+.input-wrapper input:-webkit-autofill,
+.input-wrapper input:-webkit-autofill:hover,
+.input-wrapper input:-webkit-autofill:focus,
+.input-wrapper input:-webkit-autofill:active,
+.input-wrapper select:-webkit-autofill,
+.input-wrapper select:-webkit-autofill:hover,
+.input-wrapper select:-webkit-autofill:focus {
+  /* 🎯 HACK: box-shadow cobre o fundo padrão do navegador */
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+  box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+
+  /* Força cor do texto */
+  -webkit-text-fill-color: var(--text-main) !important;
+  color: var(--text-main) !important;
+
+  /* Mantém borda */
+  border: 1px solid #e2e8f0 !important;
+
+  /* Transição suave */
+  transition: background-color 5000s ease-in-out 0s !important;
+
+  /* Mantém bordas arredondadas */
+  border-radius: 12px !important;
+}
+
+/* --- DARK MODE: Autocomplete com fundo escuro --- */
+[data-theme="dark"] .input-wrapper input:-webkit-autofill,
+[data-theme="dark"] .input-wrapper input:-webkit-autofill:hover,
+[data-theme="dark"] .input-wrapper input:-webkit-autofill:focus,
+[data-theme="dark"] .input-wrapper input:-webkit-autofill:active,
+[data-theme="dark"] .input-wrapper select:-webkit-autofill,
+[data-theme="dark"] .input-wrapper select:-webkit-autofill:hover,
+[data-theme="dark"] .input-wrapper select:-webkit-autofill:focus {
+  /* Fundo escuro do input no dark mode */
+  -webkit-box-shadow: 0 0 0 1000px rgba(44, 44, 46, 0.68) inset !important;
+  box-shadow: 0 0 0 1000px rgba(44, 44, 46, 0.68) inset !important;
+
+  /* Texto branco */
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+
+  /* Borda sutil dark */
+  border-color: rgba(255,255,255, 0.15) !important;
+
+  transition: background-color 5000s ease-in-out 0s !important;
+  border-radius: 12px !important;
+}
+
+/* 🦊 FIREFOX: Autocomplete Fix */
+.input-wrapper input:-moz-autofill,
+.input-wrapper select:-moz-autofill {
+  background-color: var(--bg-input) !important;
+  color: var(--text-main) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="dark"] .input-wrapper input:-moz-autofill,
+[data-theme="dark"] .input-wrapper select:-moz-autofill {
+  background-color: rgba(44, 44, 46, 0.68) !important;
+  color: #ffffff !important;
+  border-color: rgba(255,255,255, 0.15) !important;
+}
+
+/* 🔍 AUTOCOMPLETE DROPDOWN (Lista de sugestões do navegador) */
+.input-wrapper input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+}
+
+/* 🎨 Remove o ícone de "gerenciar senhas" do Edge */
+.input-wrapper input::-ms-reveal,
+.input-wrapper input::-ms-clear {
+  display: none;
+}
+
+
