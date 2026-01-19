@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ⚡ ANTI-FLASH: APLICA TEMA ANTES DO CSS CARREGAR -->
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const validTheme = (savedTheme === 'dark') ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', validTheme);
+      })();
+    </script>
+    <title>Cadastro - Gestão de Condomínio</title>
+    <script src="../performance.js"></script>
+    <link rel="icon" type="image/png" href="../imagens/Logo.png">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../global.css" />
+    <link rel="stylesheet" href="login.css" />
+  </head>
+  <script src="../dashboard/theme.js"></script>
+  <body class="login-page">
+    <main class="login-card" style="max-width: 500px">
+      <div class="login-header">
+        <img src="../imagens/Logo.webp" alt="Logo do Sistema" />
+        <h2>Crie sua conta</h2>
+        <p>Junte-se ao seu condomínio digital</p>
+      </div>
+
+      <form onsubmit="handleRegister(event)">
+        <div class="input-group">
+          <label for="name">Nome Completo</label>
+          <div class="input-wrapper">
+            <i class="fa-regular fa-user"></i>
+            <input
+              type="text"
+              id="name"
+              placeholder="Ex: Eduardo Bruscagim"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label for="phone">Celular</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-phone"></i>
+              <input
+                type="tel"
+                id="phone"
+                placeholder="(11) 99999-9999"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="userType">Você é?</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-user-tag"></i>
+              <select id="userType" required>
+                <option value="" disabled selected>Selecione...</option>
+                <option value="Proprietário">Proprietário</option>
+                <option value="Inquilino">Inquilino</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label for="unit">Apt/Casa</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-door-open"></i>
+              <input type="text" id="unit" placeholder="Ex: 402" required />
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="block">Bloco</label>
+            <div class="input-wrapper">
+              <i class="fa-regular fa-building"></i>
+              <input type="text" id="block" placeholder="Ex: A" required style="text-transform: uppercase;" />
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="email">E-mail</label>
+          <div class="input-wrapper">
+            <i class="fa-regular fa-envelope"></i>
+            <input
+              type="email"
+              id="email"
+              placeholder="seu@email.com"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Senha</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock"></i>
+            <input
+              type="password"
+              id="password"
+              placeholder="Mínimo 6 caracteres"
+              required
+            />
+          </div>
+        </div>
+
+        <div id="feedback" class="status-msg"></div>
+
+        <button
+          type="submit"
+          class="btn btn-primary btn-full"
+          style="margin-top: 10px"
+        >
+          Criar Conta
+        </button>
+
+        <div class="register-link">
+          Já tem cadastro? <a href="login.html">Fazer Login</a>
+        </div>
+      </form>
+
+      <a href="../index.html" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Voltar para o site
+      </a>
+    </main>
+
+    <script type="module">
+      import { supabase } from '../services/supabase.js';
+
+      // ==========================================
+      // 🎭 MÁSCARA DE CELULAR (AUTO-FORMAT)
+      // ==========================================
+      const phoneInput = document.getElementById("phone");
+      if (phoneInput) {
+        phoneInput.addEventListener("input", function(e) {
+          let v = e.target.value.replace(/\D/g, "");
+          v = v.substring(0, 11);
+          v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+          v = v.replace(/(\d{5})(\d)/, "$1-$2");
+          e.target.value = v;
+        });
+      }
+
+      // ==========================================
+      // 🏗️ FORMATAÇÃO DE BLOCO (VISUAL)
+      // ==========================================
+      const blockInput = document.getElementById("block");
+      if (blockInput) {
+        blockInput.addEventListener("input", function(e) {
+          e.target.value = e.target.value.toUpperCase();
+        });
+      }
+
+      // ==========================================
+      // 🔧 FUNÇÕES AUXILIARES DE VALIDAÇÃO
+      // ==========================================
+      function validarEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+      }
+
+      function validarCelular(celular) {
+        const regex = /^\(\d{2}\) \d{5}-\d{4}$/;
+        return regex.test(celular);
+      }
+
+      async function verificarUnidadeDuplicada(unidade) {
+        const { data, error } = await supabase
+          .from("moradores")
+          .select("unidade")
+          .eq("unidade", unidade)
+          .maybeSingle();
+
+        return data !== null; // true se já existe
+      }
+
+      function mostrarErro(msg, btn, originalText, box) {
+        box.innerText = "❌ " + msg;
+        box.classList.remove("success");
+        box.classList.add("error");
+        box.style.display = "block";
+        btn.innerText = originalText;
+        btn.disabled = false;
+        btn.style.opacity = "1";
+      }
+
+      // ==========================================
+      // 📝 FUNÇÃO PRINCIPAL DE REGISTRO
+      // ==========================================
+      window.handleRegister = async function(e) {
+        e.preventDefault();
+
+        const btn = e.target.querySelector("button");
+        const feedbackBox = document.getElementById("feedback");
+        const originalText = btn.innerText;
+
+        // Limpa erros anteriores
+        feedbackBox.style.display = 'none';
+        feedbackBox.className = 'status-msg';
+
+        // Coleta dados
+        const nome = document.getElementById("name").value.trim();
+        const celular = document.getElementById("phone").value;
+        const tipoUsuario = document.getElementById("userType").value;
+
+        // PADRONIZAÇÃO DE UNIDADE + BLOCO
+        const bloco = document.getElementById("block").value.toUpperCase().trim();
+        const unidadeNum = document.getElementById("unit").value.trim();
+        const unidadeFinal = `${unidadeNum} - Bloco ${bloco}`;
+
+        // Sanitização
+        const email = document.getElementById("email").value.toLowerCase().trim();
+        const password = document.getElementById("password").value;
+
+        // ==========================================
+        // ✅ VALIDAÇÕES FRONTEND (Bug #4A, #4B, #4C)
+        // ==========================================
+
+        // 1. Validar Email
+        if (!validarEmail(email)) {
+          mostrarErro("Digite um e-mail válido", btn, originalText, feedbackBox);
+          return;
+        }
+
+        // 2. Validar Celular
+        if (!validarCelular(celular)) {
+          mostrarErro("Celular inválido. Use o formato (XX) XXXXX-XXXX", btn, originalText, feedbackBox);
+          return;
+        }
+
+        // 3. Validar Senha
+        if (password.length < 6) {
+          mostrarErro("A senha deve ter no mínimo 6 caracteres", btn, originalText, feedbackBox);
+          return;
+        }
+
+        // 4. Verificar Unidade Duplicada
+        btn.innerText = "Verificando unidade...";
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+
+        const unidadeJaExiste = await verificarUnidadeDuplicada(unidadeFinal);
+        if (unidadeJaExiste) {
+          mostrarErro("Esta unidade já está cadastrada", btn, originalText, feedbackBox);
+          return;
+        }
+
+        // ==========================================
+        // 🔒 AUTH SIGNUP (Bug #2A - Trigger SQL insere automaticamente)
+        // ==========================================
+        btn.innerText = "Criando conta...";
+
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              full_name: nome,
+              celular: celular,
+              tipo: tipoUsuario,
+              unidade: unidadeFinal
+            }
+          }
+        });
+
+        if (error) {
+          mostrarErro(error.message, btn, originalText, feedbackBox);
+        } else {
+          // SUCESSO
+          feedbackBox.innerText = "✅ Cadastro realizado com sucesso!";
+          feedbackBox.classList.remove("error");
+          feedbackBox.classList.add("success");
+          feedbackBox.style.display = "block";
+
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 1500);
+        }
+      }
+    </script>
+  </body>
+</html>
