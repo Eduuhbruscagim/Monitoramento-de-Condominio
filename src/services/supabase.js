@@ -1,9 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
 
 // ✅ Credenciais agora vem de variáveis de ambiente (.env)
-// Isso evita expor credenciais no código fonte
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
+
+// 🔍 DEBUG - REMOVER DEPOIS
+console.log('🔍 DEBUG ENV:', {
+  SUPABASE_URL,
+  SUPABASE_KEY: SUPABASE_KEY ? '✅ Existe' : '❌ Undefined',
+  allEnv: import.meta.env
+});
 
 // Validação: garante que as credenciais existem
 if (!SUPABASE_URL || !SUPABASE_KEY) {
