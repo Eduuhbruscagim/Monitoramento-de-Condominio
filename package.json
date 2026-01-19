@@ -17,6 +17,7 @@
   "author": "Eduardo Bruscagim",
   "license": "MIT",
   "devDependencies": {
+    "autoprefixer": "^10.4.16",
     "terser": "^5.36.0",
     "vite": "^5.0.0"
   },

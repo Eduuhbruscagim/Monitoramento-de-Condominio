@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import autoprefixer from 'autoprefixer';
 
 export default defineConfig({
   root: 'src',
@@ -57,9 +58,25 @@ export default defineConfig({
     },
   },
   
-  // Otimização de CSS
+  // ✅ Otimização de CSS com Autoprefixer
   css: {
     devSourcemap: true,
+    postcss: {
+      plugins: [
+        autoprefixer({
+          overrideBrowserslist: [
+            'last 3 versions',
+            '> 1%',
+            'iOS >= 12',
+            'Safari >= 12',
+            'Chrome >= 90',
+            'Firefox >= 88'
+          ],
+          flexbox: 'no-2009',
+          grid: 'autoplace'
+        })
+      ]
+    }
   },
   
   // Preview (após build)
