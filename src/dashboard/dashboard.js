@@ -2,19 +2,58 @@ import { supabase } from "../services/supabase.js";
 
 /**
  * ============================================================================
+ * CONSTANTS
+ * Constantes para evitar magic numbers
+ * ============================================================================
+ */
+const TIMEOUTS = {
+  TOAST_DISPLAY: 4000,
+  TOAST_DISPLAY_ERROR: 6000,
+  IMAGE_VALIDATION: 8000,
+  SETTINGS_SAVE_FEEDBACK: 2000,
+};
+
+const TIME = {
+  SECOND: 1000,
+  MINUTE: 60 * 1000,
+  HOUR: 60 * 60 * 1000,
+  DAY: 24 * 60 * 60 * 1000,
+};
+
+const CACHE_TTL = {
+  DEFAULT: 5 * TIME.MINUTE,
+  KPIS: 2 * TIME.MINUTE,
+  RESERVAS: 10 * TIME.MINUTE,
+  MORADORES: 15 * TIME.MINUTE,
+  NOTIFICACOES: 3 * TIME.MINUTE,
+};
+
+/**
+ * ============================================================================
  * UTILS & HELPERS
  * Funções utilitárias para formatação, segurança e datas
  * ============================================================================
  */
 const Utils = {
+  // ✅ CORREÇÃO: XSS Protection melhorada
   safe: (str) => {
     if (!str) return "";
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+    
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;',
+      '`': '&#96;',
+      '/': '&#x2F;',
+      '=': '&#x3D;',
+      '\n': '&#10;',
+      '\r': '&#13;',
+      '\0': '',
+    };
+    
+    return String(str).replace(/[&<>"'`/=\n\r\0]/g, (char) => map[char] || char);
   },
 
   formatBRL: (value) => {
@@ -41,7 +80,7 @@ const Utils = {
 
   formatarTempoRelativo: (data) => {
     const agora = new Date();
-    const diff = Math.floor((agora - data) / 1000);
+    const diff = Math.floor((agora - data) / TIME.SECOND);
     if (diff < 60) return "Agora mesmo";
     if (diff < 3600) return `Há ${Math.floor(diff / 60)} min`;
     if (diff < 86400) return `Há ${Math.floor(diff / 3600)} h`;
@@ -54,7 +93,8 @@ const Utils = {
     )}&background=random&color=fff&size=200`;
   },
 
-  validarImagemURL: (url) => {
+  // ✅ CORREÇÃO: Validação de imagem com timeout maior e cleanup adequado
+  validarImagemURL: (url, timeout = TIMEOUTS.IMAGE_VALIDATION) => {
     return new Promise((resolve) => {
       if (!url || url.trim() === "") {
         resolve(false);
@@ -62,14 +102,122 @@ const Utils = {
       }
 
       const img = new Image();
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
-      img.src = url;
+      let timeoutId;
+      let resolved = false;
 
-      setTimeout(() => resolve(false), 5000);
+      const cleanup = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        img.onload = null;
+        img.onerror = null;
+        img.src = ''; // Cancela o download
+      };
+
+      img.onload = () => {
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          resolve(true);
+        }
+      };
+
+      img.onerror = () => {
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          resolve(false);
+        }
+      };
+
+      timeoutId = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          resolve(false);
+        }
+      }, timeout);
+
+      img.src = url;
     });
   },
 };
+
+/**
+ * ============================================================================
+ * SMART CACHE SYSTEM
+ * Sistema de cache inteligente com TTL dinâmico e invalidação
+ * ============================================================================
+ */
+class SmartCache {
+  constructor() {
+    this.stores = new Map();
+    this.listeners = new Map();
+  }
+  
+  // ✅ CORREÇÃO: TTL diferente por tipo de dado
+  getTTL(key) {
+    const ttls = {
+      'kpis': CACHE_TTL.KPIS,
+      'reservas': CACHE_TTL.RESERVAS,
+      'moradores': CACHE_TTL.MORADORES,
+      'notificacoes': CACHE_TTL.NOTIFICACOES,
+      'ocorrencias': CACHE_TTL.DEFAULT,
+      'caixa': CACHE_TTL.DEFAULT,
+    };
+    return ttls[key] || CACHE_TTL.DEFAULT;
+  }
+  
+  set(key, value) {
+    this.stores.set(key, {
+      data: value,
+      timestamp: Date.now(),
+      ttl: this.getTTL(key)
+    });
+    this.notifyListeners(key, value);
+  }
+  
+  get(key) {
+    const store = this.stores.get(key);
+    if (!store) return null;
+    
+    const isExpired = Date.now() - store.timestamp > store.ttl;
+    if (isExpired) {
+      this.stores.delete(key);
+      return null;
+    }
+    
+    return store.data;
+  }
+  
+  invalidate(key) {
+    this.stores.delete(key);
+    this.notifyListeners(key, null);
+  }
+  
+  invalidateAll() {
+    this.stores.clear();
+  }
+  
+  // Permite componentes se inscreverem em mudanças do cache
+  subscribe(key, callback) {
+    if (!this.listeners.has(key)) {
+      this.listeners.set(key, []);
+    }
+    this.listeners.get(key).push(callback);
+  }
+  
+  notifyListeners(key, data) {
+    const callbacks = this.listeners.get(key) || [];
+    callbacks.forEach(cb => {
+      try {
+        cb(data);
+      } catch (error) {
+        console.error(`Error in cache listener for ${key}:`, error);
+      }
+    });
+  }
+}
+
+const cache = new SmartCache();
 
 /**
  * ============================================================================
@@ -77,24 +225,10 @@ const Utils = {
  * Gerenciamento centralizado do estado da aplicação
  * ============================================================================
  */
-const CACHE_TTL = 5 * 60 * 1000;
-
 const State = {
   usuarioLogado: null,
   moradoresCache: [],
   idEditando: null,
-
-  reservasCache: null,
-  reservasCacheTime: 0,
-
-  ocorrenciasCache: null,
-  ocorrenciasCacheTime: 0,
-
-  caixaCache: null,
-  caixaCacheTime: 0,
-
-  notificacoesCache: null,
-  notificacoesCacheTime: 0,
 
   emailParaDeletar: null,
   reservaParaDeletar: null,
@@ -105,6 +239,9 @@ const State = {
   carregandoCaixa: false,
   carregandoNotificacoes: false,
   carregandoKPIs: false,
+  
+  // ✅ CORREÇÃO: Rastreamento de requisições em andamento para evitar race conditions
+  pendingRequests: new Map(),
 };
 
 const isAdmin = () =>
@@ -118,6 +255,66 @@ const getMeuUserId = async () => {
   }
   return data.user.id;
 };
+
+/**
+ * ============================================================================
+ * DEDUPLICATION HELPER
+ * Previne race conditions em requisições simultâneas
+ * ============================================================================
+ */
+// ✅ CORREÇÃO: Função para evitar race conditions
+async function fetchWithDedup(key, fetchFn) {
+  // Se já tem requisição em andamento, retorna a mesma Promise
+  if (State.pendingRequests.has(key)) {
+    return State.pendingRequests.get(key);
+  }
+  
+  // Cria nova requisição
+  const promise = fetchFn().finally(() => {
+    State.pendingRequests.delete(key);
+  });
+  
+  State.pendingRequests.set(key, promise);
+  return promise;
+}
+
+/**
+ * ============================================================================
+ * GLOBAL ERROR HANDLER
+ * Tratamento centralizado de erros
+ * ============================================================================
+ */
+// ✅ CORREÇÃO: Handler global de erros
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  
+  UI.showToast(
+    'Ocorreu um erro inesperado. Tente novamente ou recarregue a página.',
+    'error'
+  );
+  
+  event.preventDefault();
+});
+
+window.addEventListener('error', (event) => {
+  console.error('Global error:', event.error);
+  
+  UI.showToast(
+    'Erro crítico detectado. Por favor, recarregue a página.',
+    'error'
+  );
+});
+
+// Wrapper para todas as chamadas assíncronas
+async function safeAsync(fn, errorMessage = 'Erro ao processar operação') {
+  try {
+    return await fn();
+  } catch (error) {
+    console.error(error);
+    UI.showToast(errorMessage, 'error');
+    throw error; // Re-throw para não mascarar o erro
+  }
+}
 
 /**
  * ============================================================================
@@ -173,7 +370,6 @@ const MoradorService = {
     try {
       console.log("Deletando user_id:", user_id);
 
-      // Chama a função SQL no Supabase
       const { data, error } = await supabase.rpc('delete_user_auth', {
         target_user_id: user_id
       });
@@ -185,7 +381,6 @@ const MoradorService = {
 
       console.log("Response data:", data);
 
-      // Verifica se retornou erro na resposta JSON
       if (data && data.error) {
         throw new Error(data.error);
       }
@@ -197,8 +392,10 @@ const MoradorService = {
     }
   },
 
+  // ✅ CORREÇÃO: Cleanup adequado no logout
   async logout() {
     try {
+      // Cleanup do realtime channel
       if (window.dashboardChannel) {
         await window.dashboardChannel.unsubscribe();
         window.dashboardChannel = null;
@@ -212,12 +409,11 @@ const MoradorService = {
           window.location.href = "../auth/login.html";
         }, 1000);
       } else {
+        // Limpa todo o estado
         State.usuarioLogado = null;
-        State.reservasCache = null;
-        State.ocorrenciasCache = null;
-        State.caixaCache = null;
-        State.notificacoesCache = null;
+        cache.invalidateAll();
         State.moradoresCache = [];
+        State.pendingRequests.clear();
         window.location.href = "../auth/login.html";
       }
     } catch (err) {
@@ -370,6 +566,69 @@ const NotificationService = {
 
 /**
  * ============================================================================
+ * SKELETON FACTORY
+ * Componente reutilizável para skeletons
+ * ============================================================================
+ */
+const SkeletonFactory = {
+  row(columns) {
+    const cells = columns.map(width => 
+      `<td><div class="skeleton skeleton-text" style="width:${width}"></div></td>`
+    ).join('');
+    return `<tr>${cells}</tr>`;
+  },
+  
+  table(columns, rowCount = 5) {
+    return Array(rowCount).fill(0)
+      .map(() => this.row(columns))
+      .join('');
+  },
+  
+  activityItem() {
+    return `
+      <div class="activity-item">
+        <div class="skeleton skeleton-avatar" style="width:52px;height:52px;border-radius:16px;"></div>
+        <div class="activity-info" style="flex:1">
+          <div class="skeleton skeleton-text" style="width:50%"></div>
+          <div class="skeleton skeleton-text" style="width:30%"></div>
+        </div>
+        <div class="skeleton skeleton-text" style="width:60px;height:24px;border-radius:20px;"></div>
+      </div>`;
+  },
+  
+  notificationItem() {
+    return `
+      <div class="notif-item">
+        <div class="skeleton skeleton-avatar" style="border-radius:12px;"></div>
+        <div class="notif-content">
+          <div class="skeleton skeleton-text" style="width:70%"></div>
+          <div class="skeleton skeleton-text" style="width:40%"></div>
+        </div>
+      </div>`;
+  },
+  
+  moradorRow() {
+    return `
+      <tr>
+        <td>
+          <div class="user-cell">
+            <div class="skeleton skeleton-avatar"></div>
+            <div>
+              <div class="skeleton skeleton-text" style="width:100px"></div>
+              <div class="skeleton skeleton-text" style="width:60px"></div>
+            </div>
+          </div>
+        </td>
+        <td><div class="skeleton skeleton-text" style="width:50px"></div></td>
+        <td><div class="skeleton skeleton-text" style="width:120px"></div></td>
+        <td><div class="skeleton skeleton-text" style="width:80px"></div></td>
+        <td><div class="skeleton skeleton-text" style="width:30px"></div></td>
+      </tr>`;
+  }
+};
+
+/**
+ * ============================================================================
  * UI LAYER
  * Controladores de interface e manipulação do DOM
  * ============================================================================
@@ -455,8 +714,7 @@ const UI = {
       info: "Informação",
     };
 
-    // Duração baseada no tipo - erro fica mais tempo
-    const duration = type === "error" ? 6000 : 4000;
+    const duration = type === "error" ? TIMEOUTS.TOAST_DISPLAY_ERROR : TIMEOUTS.TOAST_DISPLAY;
 
     if (this.currentToast && this.currentToast.isConnected) {
       this.currentToast.remove();
@@ -514,7 +772,6 @@ const UI = {
     if (this.elements.userRole)
       this.elements.userRole.innerText = cargoAmigavel;
 
-    // SEMPRE mostra a imagem se existir (seja personalizada ou UI Avatars)
     if (perfil.img && perfil.img.trim() !== "") {
       if (this.elements.userAvatar)
         this.elements.userAvatar.style.display = "none";
@@ -522,7 +779,6 @@ const UI = {
         this.elements.userAvatarImg.src = perfil.img;
         this.elements.userAvatarImg.style.display = "block";
 
-        // Fallback: se falhar ao carregar, mostra letra inicial
         this.elements.userAvatarImg.onerror = () => {
           this.elements.userAvatarImg.style.display = "none";
           if (this.elements.userAvatar) {
@@ -532,7 +788,6 @@ const UI = {
         };
       }
     } else {
-      // SÓ mostra letra inicial se NÃO tiver imagem nenhuma
       if (this.elements.userAvatarImg)
         this.elements.userAvatarImg.style.display = "none";
       if (this.elements.userAvatar) {
@@ -542,86 +797,81 @@ const UI = {
     }
   },
 
+  // ✅ CORREÇÃO: Promises com tratamento de erro adequado
   async renderizarKPIs() {
-    if (this.elements.kpiSaldo) {
-      const { data, error } = await CaixaService.saldo();
-      if (error) {
-        this.elements.kpiSaldo.innerText = "Restrito";
-        if (this.elements.kpiSaldoSub)
-          this.elements.kpiSaldoSub.innerText = "Sem acesso";
-      } else {
-        this.elements.kpiSaldo.innerText = Utils.formatBRLInteiro(
-          data?.saldo || 0
-        );
-        if (this.elements.kpiSaldoSub)
-          this.elements.kpiSaldoSub.innerText = "Atualizado agora";
+    try {
+      if (this.elements.kpiSaldo) {
+        const { data, error } = await CaixaService.saldo();
+        if (error) {
+          this.elements.kpiSaldo.innerText = "Restrito";
+          if (this.elements.kpiSaldoSub)
+            this.elements.kpiSaldoSub.innerText = "Sem acesso";
+        } else {
+          this.elements.kpiSaldo.innerText = Utils.formatBRLInteiro(
+            data?.saldo || 0
+          );
+          if (this.elements.kpiSaldoSub)
+            this.elements.kpiSaldoSub.innerText = "Atualizado agora";
+        }
       }
-    }
 
-    if (this.elements.kpiOcorrencias) {
-      const { data, error } = await OcorrenciaService.listar();
-      if (!error && data) {
-        const abertas = data.filter(
-          (o) => (o.status || "").toLowerCase() === "aberta"
-        ).length;
-        const urgentes = data.filter(
-          (o) => (o.status || "").toLowerCase() === "urgente"
-        ).length;
-        this.elements.kpiOcorrencias.innerText = `${abertas} Abertas`;
-        if (this.elements.kpiOcorrenciasSub)
-          this.elements.kpiOcorrenciasSub.innerText = `${urgentes} Urgente`;
+      if (this.elements.kpiOcorrencias) {
+        const { data, error } = await OcorrenciaService.listar();
+        if (!error && data) {
+          const abertas = data.filter(
+            (o) => (o.status || "").toLowerCase() === "aberta"
+          ).length;
+          const urgentes = data.filter(
+            (o) => (o.status || "").toLowerCase() === "urgente"
+          ).length;
+          this.elements.kpiOcorrencias.innerText = `${abertas} Abertas`;
+          if (this.elements.kpiOcorrenciasSub)
+            this.elements.kpiOcorrenciasSub.innerText = `${urgentes} Urgente`;
+        }
       }
-    }
 
-    if (this.elements.kpiUnidades) {
-      const { data } = await KpiService.unidades();
-      if (data && data[0]) {
-        const { total, ocupadas, vazias } = data[0];
-        this.elements.kpiUnidades.innerText = `${ocupadas}/${total}`;
-        if (this.elements.kpiUnidadesSub)
-          this.elements.kpiUnidadesSub.innerText = `${vazias} Vazias`;
+      if (this.elements.kpiUnidades) {
+        const { data } = await KpiService.unidades();
+        if (data && data[0]) {
+          const { total, ocupadas, vazias } = data[0];
+          this.elements.kpiUnidades.innerText = `${ocupadas}/${total}`;
+          if (this.elements.kpiUnidadesSub)
+            this.elements.kpiUnidadesSub.innerText = `${vazias} Vazias`;
+        }
       }
+    } catch (error) {
+      console.error('Erro ao renderizar KPIs:', error);
+      this.showToast('Erro ao carregar indicadores', 'error');
     }
   },
 
   async renderizarAtividadesRecentes() {
     if (!this.elements.recentActivities) return;
 
-    const cacheValido =
-      State.reservasCache &&
-      State.reservasCache.length > 0 &&
-      Date.now() - State.reservasCacheTime < CACHE_TTL;
+    try {
+      const cachedData = cache.get('reservas');
+      const cacheValido = cachedData !== null;
 
-    if (!cacheValido) {
-      this.elements.recentActivities.innerHTML = Array(1)
-        .fill(0)
-        .map(
-          () => `
-        <div class="activity-item">
-          <div class="skeleton skeleton-avatar" style="width:52px;height:52px;border-radius:16px;"></div>
-          <div class="activity-info" style="flex:1">
-            <div class="skeleton skeleton-text" style="width:50%"></div>
-            <div class="skeleton skeleton-text" style="width:30%"></div>
-          </div>
-          <div class="skeleton skeleton-text" style="width:60px;height:24px;border-radius:20px;"></div>
-        </div>`
-        )
-        .join("");
-    } else {
-      this._renderActivitiesList(State.reservasCache);
+      if (!cacheValido) {
+        this.elements.recentActivities.innerHTML = SkeletonFactory.activityItem();
+      } else {
+        this._renderActivitiesList(cachedData);
+      }
+
+      const { data, error } = await ReservaService.listar();
+
+      if (error) {
+        if (!cacheValido)
+          this.elements.recentActivities.innerHTML = `<div class="activity-item">Erro ao carregar.</div>`;
+        return;
+      }
+
+      cache.set('reservas', data);
+      this._renderActivitiesList(data);
+    } catch (error) {
+      console.error('Erro ao renderizar atividades:', error);
+      this.elements.recentActivities.innerHTML = `<div class="activity-item">Erro ao carregar.</div>`;
     }
-
-    const { data, error } = await ReservaService.listar();
-
-    if (error) {
-      if (!cacheValido)
-        this.elements.recentActivities.innerHTML = `<div class="activity-item">Erro ao carregar.</div>`;
-      return;
-    }
-
-    State.reservasCache = data;
-    State.reservasCacheTime = Date.now();
-    this._renderActivitiesList(data);
   },
 
   _renderActivitiesList(data) {
@@ -646,7 +896,7 @@ const UI = {
     const souDono = isAdmin();
     this.elements.recentActivities.innerHTML = futuras
       .map((r) => {
-        const diffDias = Math.ceil((r.dataObj - hoje) / (1000 * 60 * 60 * 24));
+        const diffDias = Math.ceil((r.dataObj - hoje) / TIME.DAY);
         const quando = diffDias === 0 ? "Hoje" : `Em ${diffDias}d`;
         const linhaInfo = souDono
           ? Utils.safe(r.nome_morador || "Morador")
@@ -725,41 +975,28 @@ const UINotifications = {
     if (this.wrapper) this.wrapper.classList.remove("highlight-wrapper");
   },
 
+  // ✅ CORREÇÃO: Promises com tratamento de erro
   async render() {
-    const cacheValido =
-      State.notificacoesCache &&
-      Date.now() - State.notificacoesCacheTime < CACHE_TTL;
-
-    if (cacheValido) {
-      this.renderHTML(State.notificacoesCache);
-      return;
-    }
-
-    if (State.carregandoNotificacoes) return;
-    State.carregandoNotificacoes = true;
-
-    this.list.innerHTML = Array(1)
-      .fill(0)
-      .map(
-        () => `
-      <div class="notif-item">
-        <div class="skeleton skeleton-avatar" style="border-radius:12px;"></div>
-        <div class="notif-content">
-          <div class="skeleton skeleton-text" style="width:70%"></div>
-          <div class="skeleton skeleton-text" style="width:40%"></div>
-        </div>
-      </div>
-    `
-      )
-      .join("");
-
     try {
+      const cachedData = cache.get('notificacoes');
+      const cacheValido = cachedData !== null;
+
+      if (cacheValido) {
+        this.renderHTML(cachedData);
+        return;
+      }
+
+      if (State.carregandoNotificacoes) return;
+      State.carregandoNotificacoes = true;
+
+      this.list.innerHTML = SkeletonFactory.notificationItem();
+
       const itens = await NotificationService.buscarTudo();
-      State.notificacoesCache = itens || [];
-      State.notificacoesCacheTime = Date.now();
-      this.renderHTML(State.notificacoesCache);
+      cache.set('notificacoes', itens || []);
+      this.renderHTML(itens || []);
     } catch (err) {
-      this.list.innerHTML = `<div style="padding:20px;text-align:center;color:#ef4444">Erro.</div>`;
+      console.error('Erro ao carregar notificações:', err);
+      this.list.innerHTML = `<div style="padding:20px;text-align:center;color:#ef4444">Erro ao carregar.</div>`;
     } finally {
       State.carregandoNotificacoes = false;
     }
@@ -903,6 +1140,7 @@ const UIConfig = {
     }
   },
 
+  // ✅ CORREÇÃO: Tratamento de erro melhorado
   async salvarPerfil() {
     const btn = this.formPerfil.querySelector("button");
     const originalText = btn.innerText;
@@ -930,8 +1168,7 @@ const UIConfig = {
           urlInvalida = true;
           UI.showToast("URL de imagem inválida. Usando avatar padrão.", "error");
 
-          // Aguarda 2 segundos antes de continuar
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise(resolve => setTimeout(resolve, TIMEOUTS.SETTINGS_SAVE_FEEDBACK));
         }
       }
 
@@ -969,7 +1206,6 @@ const UIConfig = {
         }
       }
 
-      // Mensagem diferente dependendo se houve erro ou não
       if (!urlInvalida) {
         UI.showToast("Perfil atualizado!", "success");
       } else {
@@ -1038,23 +1274,20 @@ const UIReserva = {
           created_at: new Date().toISOString(),
         };
 
-        if (State.reservasCache) {
-          State.reservasCache = [...State.reservasCache, reservaTemp].sort(
-            (a, b) => new Date(a.data) - new Date(b.data)
-          );
-        } else {
-          State.reservasCache = [reservaTemp];
-        }
-        this.renderizarLista(State.reservasCache);
+        const cachedReservas = cache.get('reservas') || [];
+        const novasReservas = [...cachedReservas, reservaTemp].sort(
+          (a, b) => new Date(a.data) - new Date(b.data)
+        );
+        cache.set('reservas', novasReservas);
+        this.renderizarLista(novasReservas);
 
         ModalUX.close(this.modal);
         this.form.reset();
 
         const { error } = await ReservaService.criar(area, data);
         if (error) {
-          State.reservasCache = State.reservasCache.filter(
-            (r) => r.id !== tempId
-          );
+          const revertedReservas = cachedReservas.filter((r) => r.id !== tempId);
+          cache.set('reservas', revertedReservas);
           await this.carregar();
 
           if (error.code === "23505") {
@@ -1064,8 +1297,7 @@ const UIReserva = {
           }
         } else {
           UI.showToast("Reserva confirmada!", "success");
-          State.notificacoesCache = null;
-          State.notificacoesCacheTime = 0;
+          cache.invalidate('notificacoes');
           await this.carregar();
         }
       });
@@ -1076,34 +1308,28 @@ const UIReserva = {
         if (!State.reservaParaDeletar) return;
 
         const idParaDeletar = State.reservaParaDeletar;
-        const reservaOriginal = State.reservasCache?.find(
-          (r) => r.id === idParaDeletar
-        );
+        const cachedReservas = cache.get('reservas') || [];
+        const reservaOriginal = cachedReservas.find((r) => r.id === idParaDeletar);
 
-        if (State.reservasCache) {
-          State.reservasCache = State.reservasCache.filter(
-            (r) => r.id !== idParaDeletar
-          );
-        } else {
-          State.reservasCache = [];
-        }
-        this.renderizarLista(State.reservasCache);
+        const novasReservas = cachedReservas.filter((r) => r.id !== idParaDeletar);
+        cache.set('reservas', novasReservas);
+        this.renderizarLista(novasReservas);
 
         ModalUX.close(this.modalDelete);
         UI.showToast("Reserva cancelada.", "info");
 
         const { error } = await ReservaService.deletar(idParaDeletar);
         if (error) {
-          if (reservaOriginal && State.reservasCache) {
-            State.reservasCache = [...State.reservasCache, reservaOriginal].sort(
+          if (reservaOriginal) {
+            const revertedReservas = [...cachedReservas, reservaOriginal].sort(
               (a, b) => new Date(a.data) - new Date(b.data)
             );
+            cache.set('reservas', revertedReservas);
           }
           await this.carregar();
           UI.showToast(error.message, "error");
         } else {
-          State.notificacoesCache = null;
-          State.notificacoesCacheTime = 0;
+          cache.invalidate('notificacoes');
         }
       });
     }
@@ -1164,6 +1390,7 @@ const UIReserva = {
       .join("");
   },
 
+  // ✅ CORREÇÃO: Usa fetchWithDedup para evitar race conditions
   async carregar() {
     if (!this.lista || State.carregandoReservas) return;
     State.carregandoReservas = true;
@@ -1171,35 +1398,24 @@ const UIReserva = {
     const souDono = isAdmin();
     const colCount = souDono ? 4 : 3;
 
-    if (!this.lista.children.length) {
-      this.lista.innerHTML = Array(1)
-        .fill(0)
-        .map(
-          () => `
-        <tr>
-          <td><div class="skeleton skeleton-text" style="width:80px"></div></td>
-          <td><div class="skeleton skeleton-text" style="width:120px"></div></td>
-          ${
-            souDono
-              ? '<td><div class="skeleton skeleton-text" style="width:100px"></div></td>'
-              : ""
-          }
-          <td><div class="skeleton skeleton-text" style="width:30px"></div></td>
-        </tr>
-      `
-        )
-        .join("");
-    }
-
     try {
-      const { data, error } = await ReservaService.listar();
-      if (error) throw error;
+      if (!this.lista.children.length) {
+        this.lista.innerHTML = SkeletonFactory.table(
+          souDono ? ['80px', '120px', '100px', '30px'] : ['80px', '120px', '30px'],
+          5
+        );
+      }
 
-      State.reservasCache = data || [];
-      State.reservasCacheTime = Date.now();
-      this.renderizarLista(State.reservasCache);
+      await fetchWithDedup('reservas', async () => {
+        const { data, error } = await ReservaService.listar();
+        if (error) throw error;
+
+        cache.set('reservas', data || []);
+        this.renderizarLista(data || []);
+      });
     } catch (e) {
-      this.lista.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center">Erro.</td></tr>`;
+      console.error('Erro ao carregar reservas:', e);
+      this.lista.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center">Erro ao carregar.</td></tr>`;
     } finally {
       State.carregandoReservas = false;
     }
@@ -1241,12 +1457,9 @@ const UIOcorrencias = {
           registrador_celular: State.usuarioLogado?.celular,
         };
 
-        if (State.ocorrenciasCache) {
-          State.ocorrenciasCache = [ocTemp, ...State.ocorrenciasCache];
-        } else {
-          State.ocorrenciasCache = [ocTemp];
-        }
-        this.renderizarLista(State.ocorrenciasCache);
+        const cachedOcorrencias = cache.get('ocorrencias') || [];
+        cache.set('ocorrencias', [ocTemp, ...cachedOcorrencias]);
+        this.renderizarLista([ocTemp, ...cachedOcorrencias]);
 
         ModalUX.close(this.modal);
         this.form.reset();
@@ -1254,14 +1467,11 @@ const UIOcorrencias = {
 
         const { error } = await OcorrenciaService.criar(t, d);
         if (error) {
-          State.ocorrenciasCache = State.ocorrenciasCache.filter(
-            (o) => o.id !== tempId
-          );
+          cache.set('ocorrencias', cachedOcorrencias);
           await this.carregar();
           UI.showToast(error.message, "error");
         } else {
-          State.notificacoesCache = null;
-          State.notificacoesCacheTime = 0;
+          cache.invalidate('notificacoes');
           await this.carregar();
         }
       });
@@ -1272,35 +1482,25 @@ const UIOcorrencias = {
         if (!State.ocorrenciaParaDeletar) return;
 
         const idParaDeletar = State.ocorrenciaParaDeletar;
-        const ocorrenciaOriginal = State.ocorrenciasCache?.find(
-          (o) => o.id === idParaDeletar
-        );
+        const cachedOcorrencias = cache.get('ocorrencias') || [];
+        const ocorrenciaOriginal = cachedOcorrencias.find((o) => o.id === idParaDeletar);
 
-        if (State.ocorrenciasCache) {
-          State.ocorrenciasCache = State.ocorrenciasCache.filter(
-            (o) => o.id !== idParaDeletar
-          );
-        } else {
-          State.ocorrenciasCache = [];
-        }
-        this.renderizarLista(State.ocorrenciasCache);
+        const novasOcorrencias = cachedOcorrencias.filter((o) => o.id !== idParaDeletar);
+        cache.set('ocorrencias', novasOcorrencias);
+        this.renderizarLista(novasOcorrencias);
 
         ModalUX.close(this.modalDelete);
         UI.showToast("Excluída.", "info");
 
         const { error } = await OcorrenciaService.deletar(idParaDeletar);
         if (error) {
-          if (ocorrenciaOriginal && State.ocorrenciasCache) {
-            State.ocorrenciasCache = [
-              ocorrenciaOriginal,
-              ...State.ocorrenciasCache,
-            ];
+          if (ocorrenciaOriginal) {
+            cache.set('ocorrencias', [ocorrenciaOriginal, ...cachedOcorrencias]);
           }
           await this.carregar();
           UI.showToast(error.message, "error");
         } else {
-          State.notificacoesCache = null;
-          State.notificacoesCacheTime = 0;
+          cache.invalidate('notificacoes');
         }
       });
     }
@@ -1371,44 +1571,32 @@ const UIOcorrencias = {
       .join("");
   },
 
+  // ✅ CORREÇÃO: Usa fetchWithDedup
   async carregar() {
     if (!this.lista || State.carregandoOcorrencias) return;
     State.carregandoOcorrencias = true;
 
     const souAdmin = isAdmin();
 
-    if (!this.lista.children.length) {
-      this.lista.innerHTML = Array(1)
-        .fill(0)
-        .map(
-          () => `
-        <tr>
-          <td><div class="skeleton skeleton-text" style="width:80px"></div></td>
-          <td><div class="skeleton skeleton-text" style="width:150px"></div></td>
-          ${
-            souAdmin
-              ? `<td><div class="skeleton skeleton-text" style="width:100px"></div></td>
-             <td><div class="skeleton skeleton-text" style="width:100px"></div></td>`
-              : ""
-          }
-          <td><div class="skeleton skeleton-text" style="width:70px"></div></td>
-          <td><div class="skeleton skeleton-text" style="width:30px"></div></td>
-        </tr>
-      `
-        )
-        .join("");
-    }
-
     try {
-      const { data, error } = await OcorrenciaService.listar();
-      if (error) throw error;
+      if (!this.lista.children.length) {
+        const columns = souAdmin 
+          ? ['80px', '150px', '100px', '100px', '70px', '30px']
+          : ['80px', '150px', '70px', '30px'];
+        this.lista.innerHTML = SkeletonFactory.table(columns, 5);
+      }
 
-      State.ocorrenciasCache = data || [];
-      State.ocorrenciasCacheTime = Date.now();
-      this.renderizarLista(State.ocorrenciasCache);
+      await fetchWithDedup('ocorrencias', async () => {
+        const { data, error } = await OcorrenciaService.listar();
+        if (error) throw error;
+
+        cache.set('ocorrencias', data || []);
+        this.renderizarLista(data || []);
+      });
     } catch (e) {
+      console.error('Erro ao carregar ocorrências:', e);
       const colspan = isAdmin() ? 6 : 4;
-      this.lista.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center">Erro.</td></tr>`;
+      this.lista.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center">Erro ao carregar.</td></tr>`;
     } finally {
       State.carregandoOcorrencias = false;
     }
@@ -1431,13 +1619,11 @@ const UICaixa = {
 
     if (this.btnVer) {
       this.btnVer.addEventListener("click", () => {
-        const cacheValido =
-          State.caixaCache &&
-          State.caixaCache.length > 0 &&
-          Date.now() - State.caixaCacheTime < CACHE_TTL;
+        const cachedData = cache.get('caixa');
+        const cacheValido = cachedData !== null;
 
         if (cacheValido) {
-          this.renderizarLista(State.caixaCache);
+          this.renderizarLista(cachedData);
         } else {
           this.carregarExtrato();
         }
@@ -1459,52 +1645,48 @@ const UICaixa = {
         btn.innerText = "Salvando...";
         btn.disabled = true;
 
-        const { error } = await CaixaService.movimentar(t, v, d);
-        if (error) UI.showToast(error.message, "error");
-        else {
+        try {
+          const { error } = await CaixaService.movimentar(t, v, d);
+          if (error) throw new Error(error.message);
+
           UI.showToast("Caixa atualizado", "success");
           this.form.reset();
-          State.caixaCache = null;
-          State.caixaCacheTime = 0;
-          State.notificacoesCache = null;
-          State.notificacoesCacheTime = 0;
+          cache.invalidate('caixa');
+          cache.invalidate('notificacoes');
           ModalUX.close(this.modal);
+        } catch (error) {
+          UI.showToast(error.message, "error");
+        } finally {
+          btn.innerText = original;
+          btn.disabled = false;
         }
-        btn.innerText = original;
-        btn.disabled = false;
       });
     }
   },
 
+  // ✅ CORREÇÃO: Usa fetchWithDedup
   async carregarExtrato() {
     if (!this.listaHistorico || State.carregandoCaixa) return;
     State.carregandoCaixa = true;
 
-    if (!this.listaHistorico.children.length) {
-      this.listaHistorico.innerHTML = Array(1)
-        .fill(0)
-        .map(
-          () => `
-        <tr>
-            <td><div class="skeleton skeleton-text" style="width:80px"></div></td>
-            <td><div class="skeleton skeleton-text" style="width:60px"></div></td>
-            <td><div class="skeleton skeleton-text" style="width:100px"></div></td>
-            <td><div class="skeleton skeleton-text" style="width:150px"></div></td>
-        </tr>
-        `
-        )
-        .join("");
-    }
-
     try {
-      const { data, error } = await CaixaService.listarPublico();
-      if (error) throw error;
+      if (!this.listaHistorico.children.length) {
+        this.listaHistorico.innerHTML = SkeletonFactory.table(
+          ['80px', '60px', '100px', '150px'],
+          5
+        );
+      }
 
-      State.caixaCache = data || [];
-      State.caixaCacheTime = Date.now();
-      this.renderizarLista(State.caixaCache);
+      await fetchWithDedup('caixa', async () => {
+        const { data, error } = await CaixaService.listarPublico();
+        if (error) throw error;
+
+        cache.set('caixa', data || []);
+        this.renderizarLista(data || []);
+      });
     } catch (err) {
-      this.listaHistorico.innerHTML = `<tr><td colspan="4" style="text-align:center">Erro.</td></tr>`;
+      console.error('Erro ao carregar extrato:', err);
+      this.listaHistorico.innerHTML = `<tr><td colspan="4" style="text-align:center">Erro ao carregar.</td></tr>`;
     } finally {
       State.carregandoCaixa = false;
     }
@@ -1562,26 +1744,32 @@ const UIMoradores = {
       const btn = this.form.querySelector("button");
       btn.disabled = true;
 
-      const unidade = `${
-        document.getElementById("unidade-num").value
-      } - Bloco ${document.getElementById("unidade-bloco").value}`;
+      try {
+        const unidade = `${
+          document.getElementById("unidade-num").value
+        } - Bloco ${document.getElementById("unidade-bloco").value}`;
 
-      const dados = {
-        nome: document.getElementById("nome").value,
-        celular: document.getElementById("celular").value,
-        tipo: document.getElementById("tipo").value,
-        status: document.getElementById("status").value,
-        unidade,
-        img: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          document.getElementById("nome").value
-        )}&background=random`,
-      };
+        const dados = {
+          nome: document.getElementById("nome").value,
+          celular: document.getElementById("celular").value,
+          tipo: document.getElementById("tipo").value,
+          status: document.getElementById("status").value,
+          unidade,
+          img: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            document.getElementById("nome").value
+          )}&background=random`,
+        };
 
-      await MoradorService.salvar(dados, State.idEditando);
-      UI.showToast("Salvo!");
-      ModalUX.close(this.modal);
-      this.carregar();
-      btn.disabled = false;
+        await MoradorService.salvar(dados, State.idEditando);
+        UI.showToast("Salvo!");
+        ModalUX.close(this.modal);
+        this.carregar();
+      } catch (error) {
+        console.error('Erro ao salvar morador:', error);
+        UI.showToast("Erro ao salvar", "error");
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     this.tabela?.addEventListener("click", (e) => {
@@ -1613,7 +1801,6 @@ const UIMoradores = {
       btn.innerText = "Excluindo...";
 
       try {
-        // Busca o user_id do morador
         const morador = State.moradoresCache.find(
           (m) => m.email === State.emailParaDeletar
         );
@@ -1622,7 +1809,6 @@ const UIMoradores = {
           throw new Error("Usuário não encontrado");
         }
 
-        // Chama a função SQL para deletar completamente
         await MoradorService.excluirCompleto(morador.user_id);
 
         UI.showToast("Usuário excluído do sistema!", "success");
@@ -1656,34 +1842,19 @@ const UIMoradores = {
   },
 
   async carregar() {
-    if (this.tabela && !this.tabela.children.length) {
-      this.tabela.innerHTML = Array(1)
-        .fill(0)
-        .map(
-          () => `
-            <tr>
-              <td>
-                <div class="user-cell">
-                  <div class="skeleton skeleton-avatar"></div>
-                  <div>
-                    <div class="skeleton skeleton-text" style="width:100px"></div>
-                    <div class="skeleton skeleton-text" style="width:60px"></div>
-                  </div>
-                </div>
-              </td>
-              <td><div class="skeleton skeleton-text" style="width:50px"></div></td>
-              <td><div class="skeleton skeleton-text" style="width:120px"></div></td>
-              <td><div class="skeleton skeleton-text" style="width:80px"></div></td>
-              <td><div class="skeleton skeleton-text" style="width:30px"></div></td>
-            </tr>
-          `
-        )
-        .join("");
-    }
+    try {
+      if (this.tabela && !this.tabela.children.length) {
+        this.tabela.innerHTML = SkeletonFactory.moradorRow();
+      }
 
-    const { data } = await MoradorService.listarTodos();
-    State.moradoresCache = data || [];
-    this.render();
+      const { data } = await MoradorService.listarTodos();
+      State.moradoresCache = data || [];
+      cache.set('moradores', data || []);
+      this.render();
+    } catch (error) {
+      console.error('Erro ao carregar moradores:', error);
+      UI.showToast('Erro ao carregar moradores', 'error');
+    }
   },
 
   render() {
@@ -1726,8 +1897,109 @@ const UIMoradores = {
 
 /**
  * ============================================================================
- * MAIN INIT & REALTIME
- * Inicialização principal e configuração de realtime
+ * REALTIME MANAGER
+ * Gerenciamento otimizado de realtime com cleanup adequado
+ * ============================================================================
+ */
+let dashboardChannel = null;
+
+// ✅ CORREÇÃO: Renderização otimizada - apenas atualiza item específico
+function handleRealtimeUpdate(table, payload) {
+  // Invalida cache relacionado
+  cache.invalidate(table);
+  cache.invalidate('notificacoes');
+  
+  // Recarrega apenas se estiver na view ativa
+  const activeView = document.querySelector('.view-section.active');
+  if (!activeView) return;
+  
+  const viewId = activeView.id;
+  
+  // ✅ CORREÇÃO: Só recarrega se necessário
+  const reloadMap = {
+    'view-dashboard': ['reservas', 'ocorrencias', 'caixa_movimentos'],
+    'view-reservas': ['reservas'],
+    'view-ocorrencias': ['ocorrencias'],
+    'view-moradores': ['moradores'],
+  };
+  
+  const shouldReload = reloadMap[viewId]?.includes(table);
+  if (!shouldReload) return;
+  
+  // Recarrega componente específico
+  if (table === 'ocorrencias' && viewId === 'view-ocorrencias') {
+    UIOcorrencias.carregar();
+  } else if (table === 'reservas') {
+    if (viewId === 'view-dashboard') {
+      UI.renderizarAtividadesRecentes();
+    } else if (viewId === 'view-reservas') {
+      UIReserva.carregar();
+    }
+  } else if (table === 'caixa_movimentos') {
+    UI.renderizarKPIs();
+    if (UICaixa.modalHistorico?.classList.contains('active')) {
+      UICaixa.carregarExtrato();
+    }
+  } else if (table === 'moradores') {
+    if (viewId === 'view-moradores') {
+      UIMoradores.carregar();
+    }
+    // Atualiza sidebar se for o próprio usuário
+    if (payload.eventType === "UPDATE" && payload.new.id === State.usuarioLogado?.id) {
+      const novosDados = payload.new;
+      State.usuarioLogado = { ...State.usuarioLogado, ...novosDados };
+      UI.atualizarSidebar(State.usuarioLogado);
+    }
+  }
+}
+
+// ✅ CORREÇÃO: Inicialização com cleanup adequado
+async function initRealtime() {
+  // Remove canal anterior se existir
+  if (dashboardChannel) {
+    try {
+      await dashboardChannel.unsubscribe();
+    } catch (error) {
+      console.error('Erro ao desinscrever canal anterior:', error);
+    }
+    dashboardChannel = null;
+  }
+  
+  dashboardChannel = supabase.channel("dashboard-changes");
+  
+  // Configura listeners
+  dashboardChannel
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "ocorrencias" },
+      (payload) => handleRealtimeUpdate('ocorrencias', payload)
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "reservas" },
+      (payload) => handleRealtimeUpdate('reservas', payload)
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "caixa_movimentos" },
+      (payload) => handleRealtimeUpdate('caixa_movimentos', payload)
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "moradores" },
+      (payload) => handleRealtimeUpdate('moradores', payload)
+    );
+  
+  await dashboardChannel.subscribe();
+  window.dashboardChannel = dashboardChannel;
+  
+  console.log("✅ Realtime configurado com cleanup adequado");
+}
+
+/**
+ * ============================================================================
+ * MAIN INIT
+ * Inicialização principal
  * ============================================================================
  */
 document.addEventListener("DOMContentLoaded", async () => {
@@ -1755,102 +2027,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       UIMoradores.carregar(),
     ]);
 
-    const channel = supabase.channel("dashboard-changes");
+    // ✅ CORREÇÃO: Inicializa realtime com cleanup
+    await initRealtime();
 
-    channel
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "ocorrencias" },
-        () => {
-          UI.renderizarKPIs();
-          State.notificacoesCache = null;
-          State.notificacoesCacheTime = 0;
-          State.ocorrenciasCache = null;
-          State.ocorrenciasCacheTime = 0;
-          if (
-            document
-              .getElementById("view-ocorrencias")
-              .classList.contains("active")
-          )
-            UIOcorrencias.carregar();
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "reservas" },
-        () => {
-          UI.renderizarAtividadesRecentes();
-          State.notificacoesCache = null;
-          State.notificacoesCacheTime = 0;
-          State.reservasCache = null;
-          State.reservasCacheTime = 0;
-          if (
-            document
-              .getElementById("view-reservas")
-              .classList.contains("active")
-          )
-            UIReserva.carregar();
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "caixa_movimentos" },
-        () => {
-          UI.renderizarKPIs();
-          State.caixaCache = null;
-          State.caixaCacheTime = 0;
-          State.notificacoesCache = null;
-          State.notificacoesCacheTime = 0;
-          if (UICaixa.modalHistorico.classList.contains("active"))
-            UICaixa.carregarExtrato();
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "moradores" },
-        async (payload) => {
-          if (
-            payload.eventType === "UPDATE" &&
-            payload.new.id === State.usuarioLogado?.id
-          ) {
-            const novosDados = payload.new;
-            State.usuarioLogado = { ...State.usuarioLogado, ...novosDados };
-            UI.atualizarSidebar(State.usuarioLogado);
-
-            const moradorIndex = State.moradoresCache.findIndex(
-              (m) => m.id === novosDados.id
-            );
-            if (moradorIndex !== -1) {
-              State.moradoresCache[moradorIndex] = {
-                ...State.moradoresCache[moradorIndex],
-                ...novosDados,
-              };
-              if (
-                document
-                  .getElementById("view-moradores")
-                  ?.classList.contains("active")
-              ) {
-                UIMoradores.render();
-              }
-            }
-          }
-
-          UI.renderizarKPIs();
-          if (
-            document
-              .getElementById("view-moradores")
-              .classList.contains("active")
-          )
-            UIMoradores.carregar();
-        }
-      )
-      .subscribe();
-
-    window.dashboardChannel = channel;
-
-    console.log("Dashboard sincronizado.");
+    console.log("✅ Dashboard sincronizado");
   } catch (err) {
     console.error("Fatal:", err);
+    UI.showToast("Erro ao inicializar dashboard", "error");
   }
 
   const btnLogout = document.querySelector(".menu-item.logout, #btn-logout");
@@ -1882,30 +2065,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         link.dataset.title;
 
       if (targetId === "view-reservas") {
-        const cacheValido =
-          State.reservasCache &&
-          Date.now() - State.reservasCacheTime < CACHE_TTL;
-
-        if (cacheValido) {
-          UIReserva.renderizarLista(State.reservasCache);
+        const cachedData = cache.get('reservas');
+        if (cachedData) {
+          UIReserva.renderizarLista(cachedData);
         } else {
           await UIReserva.carregar();
         }
       }
 
       if (targetId === "view-ocorrencias") {
-        const cacheValido =
-          State.ocorrenciasCache &&
-          Date.now() - State.ocorrenciasCacheTime < CACHE_TTL;
-
-        if (cacheValido) {
-          UIOcorrencias.renderizarLista(State.ocorrenciasCache);
+        const cachedData = cache.get('ocorrencias');
+        if (cachedData) {
+          UIOcorrencias.renderizarLista(cachedData);
         } else {
           await UIOcorrencias.carregar();
         }
       }
 
-      // Re-renderiza moradores quando entrar na aba
       if (targetId === "view-moradores") {
         if (State.moradoresCache && State.moradoresCache.length > 0) {
           UIMoradores.render();
@@ -1921,13 +2097,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   window.abrirModalExtrato = () => {
-    const cacheValido =
-      State.caixaCache &&
-      State.caixaCache.length > 0 &&
-      Date.now() - State.caixaCacheTime < CACHE_TTL;
-
-    if (cacheValido) {
-      UICaixa.renderizarLista(State.caixaCache);
+    const cachedData = cache.get('caixa');
+    if (cachedData) {
+      UICaixa.renderizarLista(cachedData);
     } else {
       UICaixa.carregarExtrato();
     }
@@ -1953,9 +2125,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.fecharModalExclusaoOcorrencia = () => ModalUX.closeAll();
 });
 
-window.addEventListener("beforeunload", () => {
+// ✅ CORREÇÃO: Cleanup no unload
+window.addEventListener("beforeunload", async () => {
   if (window.dashboardChannel) {
-    window.dashboardChannel.unsubscribe();
+    try {
+      await window.dashboardChannel.unsubscribe();
+    } catch (error) {
+      console.error('Erro ao cleanup do realtime:', error);
+    }
     window.dashboardChannel = null;
   }
 });
