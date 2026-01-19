@@ -1,8 +1,19 @@
-// src/services/supabase.js
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = "https://dtfzvbtodlyyfokfgllv.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0Znp2YnRvZGx5eWZva2ZnbGx2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4MDE0NDUsImV4cCI6MjA4MjM3NzQ0NX0.L6qGW1Bl8k0eQhvJL_IvGE3q7yVPGPELL2beiDLhQ_Y";
+// ✅ Credenciais agora vem de variáveis de ambiente (.env)
+// Isso evita expor credenciais no código fonte
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 
-// Cria e exporta uma instância única pronta para uso
+// Validação: garante que as credenciais existem
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  throw new Error(
+    '\u274c Credenciais do Supabase não encontradas!\n\n' +
+    'Certifique-se de que o arquivo .env existe na raiz do projeto com:\n' +
+    'VITE_SUPABASE_URL=sua-url\n' +
+    'VITE_SUPABASE_KEY=sua-chave\n\n' +
+    'Veja o arquivo .env.example para referência.'
+  );
+}
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
