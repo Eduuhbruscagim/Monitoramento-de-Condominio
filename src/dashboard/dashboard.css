@@ -3322,3 +3322,474 @@
 
 
 
+/* ==========================================================================
+   CORREÇÃO COMPLETA - BOTÕES KPI RESPONSIVOS E ALINHADOS (VERSÃO FINAL)
+   ========================================================================== */
+
+/* 1. FIX: Posicionamento base dos botões KPI - ALINHAMENTO COM TEXTO */
+.kpi-actions-wrapper {
+  position: absolute;
+  top: 16px !important;
+  right: 24px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.kpi-actions-wrapper .kpi-plus,
+.kpi-actions-wrapper .kpi-eye {
+  position: static;
+  transform: none;
+}
+
+/* 2. FIX: Tamanho dos botões KPI - Desktop (100% zoom) */
+.kpi-plus,
+.kpi-eye {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-glass);
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-flow);
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.kpi-plus:hover,
+.kpi-eye:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+}
+
+/* 3. FIX: Stat-card SEM aumentar padding (mantém original) */
+.stat-card-kpi {
+  position: relative;
+  overflow: visible;
+}
+
+/* 4. FIX: Icon-box não encolhe */
+.stat-card-kpi .icon-box {
+  flex-shrink: 0;
+}
+
+/* 5. FIX: Botão único alinhado */
+.stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+  position: absolute;
+  top: 16px !important;
+  right: 24px;
+}
+
+/* ==========================================================================
+   ZOOM - DESKTOP (110% a 200%) - DIMINUI KPI E TEXTO
+   ========================================================================== */
+
+/* ZOOM 110% */
+@media (min-resolution: 105dpi) and (max-resolution: 119dpi),
+       (-webkit-min-device-pixel-ratio: 1.1) and (-webkit-max-device-pixel-ratio: 1.24) {
+  .kpi-plus,
+  .kpi-eye {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
+    font-size: 0.8rem;
+  }
+
+  .kpi-actions-wrapper {
+    top: 16px !important;
+    right: 24px;
+    gap: 5px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 16px !important;
+    right: 24px;
+  }
+
+  /* Ajuste de textos - 110% */
+  .stat-card-kpi .stat-value {
+    font-size: 1.85rem;
+  }
+
+  .stat-card-kpi .stat-label {
+    font-size: 0.71rem;
+  }
+
+  .stat-card-kpi .stat-change {
+    font-size: 0.81rem;
+  }
+
+  .stat-card-kpi .icon-box {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}
+
+/* ZOOM 125% */
+@media (min-resolution: 120dpi) and (max-resolution: 127dpi),
+       (-webkit-min-device-pixel-ratio: 1.25) and (-webkit-max-device-pixel-ratio: 1.32) {
+  .kpi-plus,
+  .kpi-eye {
+    width: 29px;
+    height: 29px;
+    min-width: 29px;
+    min-height: 29px;
+    font-size: 0.78rem;
+  }
+
+  .kpi-actions-wrapper {
+    top: 16px !important;
+    right: 24px;
+    gap: 5px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 16px !important;
+    right: 24px;
+  }
+
+  /* Ajuste de textos - 125% */
+  .stat-card-kpi .stat-value {
+    font-size: 1.9rem;
+  }
+
+  .stat-card-kpi .stat-label {
+    font-size: 0.72rem;
+  }
+
+  .stat-card-kpi .stat-change {
+    font-size: 0.82rem;
+  }
+
+  .stat-card-kpi .icon-box {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}
+
+/* ZOOM 133% */
+@media (min-resolution: 128dpi) and (max-resolution: 143dpi),
+       (-webkit-min-device-pixel-ratio: 1.33) and (-webkit-max-device-pixel-ratio: 1.49) {
+  .kpi-plus,
+  .kpi-eye {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 0.75rem;
+  }
+
+  .kpi-actions-wrapper {
+    top: 16px !important;
+    right: 24px;
+    gap: 4px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 16px !important;
+    right: 24px;
+  }
+
+  /* Ajuste de textos - 133% */
+  .stat-card-kpi .stat-value {
+    font-size: 1.85rem;
+  }
+
+  .stat-card-kpi .stat-label {
+    font-size: 0.71rem;
+  }
+
+  .stat-card-kpi .stat-change {
+    font-size: 0.81rem;
+  }
+
+  .stat-card-kpi .icon-box {
+    width: 59px;
+    height: 59px;
+    font-size: 1.48rem;
+  }
+}
+
+/* ZOOM 150% */
+@media (min-resolution: 144dpi) and (max-resolution: 167dpi),
+       (-webkit-min-device-pixel-ratio: 1.5) and (-webkit-max-device-pixel-ratio: 1.74) {
+  .kpi-plus,
+  .kpi-eye {
+    width: 27px;
+    height: 27px;
+    min-width: 27px;
+    min-height: 27px;
+    font-size: 0.72rem;
+  }
+
+  .kpi-actions-wrapper {
+    top: 14px !important;
+    right: 22px;
+    gap: 4px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 14px !important;
+    right: 22px;
+  }
+
+  /* Ajuste de textos - 150% */
+  .stat-card-kpi .stat-value {
+    font-size: 1.75rem;
+  }
+
+  .stat-card-kpi .stat-label {
+    font-size: 0.69rem;
+  }
+
+  .stat-card-kpi .stat-change {
+    font-size: 0.79rem;
+  }
+
+  .stat-card-kpi .icon-box {
+    width: 58px;
+    height: 58px;
+    font-size: 1.45rem;
+  }
+}
+
+/* ZOOM 175% */
+@media (min-resolution: 168dpi) and (max-resolution: 191dpi),
+       (-webkit-min-device-pixel-ratio: 1.75) and (-webkit-max-device-pixel-ratio: 1.99) {
+  .kpi-plus,
+  .kpi-eye {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    min-height: 26px;
+    font-size: 0.7rem;
+  }
+
+  .kpi-actions-wrapper {
+    top: 12px !important;
+    right: 20px;
+    gap: 3px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 12px !important;
+    right: 20px;
+  }
+
+  /* Ajuste de textos - 175% */
+  .stat-card-kpi .stat-value {
+    font-size: 1.65rem;
+  }
+
+  .stat-card-kpi .stat-label {
+    font-size: 0.67rem;
+  }
+
+  .stat-card-kpi .stat-change {
+    font-size: 0.77rem;
+  }
+
+  .stat-card-kpi .icon-box {
+    width: 56px;
+    height: 56px;
+    font-size: 1.4rem;
+  }
+}
+
+/* ZOOM 200%+ */
+@media (min-resolution: 192dpi),
+       (-webkit-min-device-pixel-ratio: 2) {
+  .kpi-plus,
+  .kpi-eye {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    font-size: 0.65rem;
+  }
+
+  .kpi-actions-wrapper {
+    top: 10px !important;
+    right: 18px;
+    gap: 3px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 10px !important;
+    right: 18px;
+  }
+
+  /* Ajuste de textos - 200%+ */
+  .stat-card-kpi .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-card-kpi .stat-label {
+    font-size: 0.65rem;
+  }
+
+  .stat-card-kpi .stat-change {
+    font-size: 0.75rem;
+  }
+
+  .stat-card-kpi .icon-box {
+    width: 54px;
+    height: 54px;
+    font-size: 1.35rem;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE - MOBILE/TABLET - ALINHAMENTO CORRIGIDO
+   ========================================================================== */
+
+/* Tablet (< 1024px) */
+@media (max-width: 1024px) {
+  .kpi-actions-wrapper {
+    top: 12px !important;
+    right: 22px;
+    gap: 6px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 12px !important;
+    right: 22px;
+  }
+
+  .kpi-plus,
+  .kpi-eye {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 768px) {
+  .kpi-actions-wrapper {
+    top: 10px !important;
+    right: 20px;
+    gap: 5px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 10px !important;
+    right: 20px;
+  }
+
+  .kpi-plus,
+  .kpi-eye {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
+    font-size: 0.8rem;
+  }
+}
+
+/* S20 e similares (< 480px) */
+@media (max-width: 480px) {
+  .kpi-actions-wrapper {
+    top: 8px !important;
+    right: 18px;
+    gap: 4px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 8px !important;
+    right: 18px;
+  }
+
+  .kpi-plus,
+  .kpi-eye {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Telas muito pequenas (< 360px) */
+@media (max-width: 359px) {
+  .kpi-actions-wrapper {
+    top: 6px !important;
+    right: 16px;
+    gap: 3px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 6px !important;
+    right: 16px;
+  }
+
+  .kpi-plus,
+  .kpi-eye {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    font-size: 0.65rem;
+  }
+}
+
+/* Telas extremamente pequenas (< 320px) */
+@media (max-width: 319px) {
+  .kpi-actions-wrapper {
+    top: 4px !important;
+    right: 14px;
+    gap: 2px;
+  }
+
+  .stat-card-kpi > .kpi-plus:not(.kpi-actions-wrapper *) {
+    top: 4px !important;
+    right: 14px;
+  }
+
+  .kpi-plus,
+  .kpi-eye {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    font-size: 0.6rem;
+  }
+}
+
+/* ==========================================================================
+   DARK MODE
+   ========================================================================== */
+
+[data-theme="dark"] .kpi-plus,
+[data-theme="dark"] .kpi-eye {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(var(--blur-sm));
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+  border: 1px solid var(--border-glass) !important;
+  color: var(--primary);
+  box-shadow: var(--shadow-glass);
+}
+
+[data-theme="dark"] .kpi-plus:hover,
+[data-theme="dark"] .kpi-eye:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: var(--primary) !important;
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+}
