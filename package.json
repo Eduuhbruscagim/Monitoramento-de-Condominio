@@ -1,0 +1,22 @@
+{
+  "name": "monitoramento-de-condominio",
+  "version": "1.0.0",
+  "description": "Sistema de Monitoramento de Condomínios - TCC",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "condominio",
+    "gestao",
+    "supabase",
+    "vite"
+  ],
+  "author": "Eduardo Bruscagim",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
