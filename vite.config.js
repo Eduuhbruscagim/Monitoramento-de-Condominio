@@ -24,7 +24,10 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'src/index.html'),
         login: resolve(__dirname, 'src/auth/login.html'),
+        register: resolve(__dirname, 'src/auth/register.html'),
+        forgotPassword: resolve(__dirname, 'src/auth/forgot-password.html'),
         dashboard: resolve(__dirname, 'src/dashboard/dashboard.html'),
+        sobre: resolve(__dirname, 'src/about/sobre.html'),
       },
       output: {
         manualChunks: {
