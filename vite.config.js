@@ -3,6 +3,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   root: 'src',
+  envDir: '../', // ✅ Faz o Vite procurar .env na raiz do projeto
   
   build: {
     outDir: '../dist',
