@@ -9,14 +9,6 @@ export default defineConfig({
     outDir: '../dist',
     emptyOutDir: true,
     
-    // Multi-page configuration
-    rollupOptions: {
-      input: {
-        login: resolve(__dirname, 'src/auth/login.html'),
-        dashboard: resolve(__dirname, 'src/dashboard/dashboard.html'),
-      },
-    },
-    
     // Otimizações
     minify: 'terser',
     terserOptions: {
@@ -26,9 +18,13 @@ export default defineConfig({
       },
     },
     
-    // Code splitting
+    // Code splitting e multi-page
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      input: {
+        login: resolve(__dirname, 'src/auth/login.html'),
+        dashboard: resolve(__dirname, 'src/dashboard/dashboard.html'),
+      },
       output: {
         manualChunks: {
           'supabase': ['@supabase/supabase-js'],
