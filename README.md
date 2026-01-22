@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🏢 Gestão Inteligente de Condomínios
-**Plataforma web para transparência, organização e comunicação condominial — com UX moderna, tema claro/escuro e performance adaptativa.**
+**Plataforma web para transparência, organização e comunicação condominial, com UX moderna, tema claro/escuro e performance adaptativa.**
 
 <!-- Badges -->
 <a href="LICENSE"><img alt="Licença" src="https://img.shields.io/badge/license-MIT-yellow.svg"></a>
@@ -33,33 +33,28 @@
 
 ## ✨ Visão geral
 
-O **Gestão Inteligente de Condomínios** é um sistema web voltado para centralizar o que mais gera atrito no dia a dia do condomínio: manutenção, gastos, reservas e ocorrências — com comunicação objetiva e acesso rápido às informações.  
-A aplicação é organizada por módulos (`about`, `auth` e `dashboard`) e usa uma base “vanilla” (HTML/CSS/JS), priorizando performance, clareza visual e navegação responsiva.
+O **Gestão Inteligente de Condomínios** é um sistema web voltado para centralizar o que mais gera desconforto no dia a dia do condomínio: manutenção, gastos, reservas e ocorrências, com comunicação e acesso rápido às informações.
+A aplicação é organizada por módulos (`about`, `auth` e `dashboard`) e usa uma base limpa (HTML/CSS/JS), desenvolvi assim para ter foco em desempenho, clareza visual e navegação fluida.
 
-> 💡 Dica de apresentação: mantenha `src/imagens/Mac.webp` como capa e adicione prints reais em `src/imagens/` (ex.: `screenshot-login.webp`, `screenshot-dashboard.webp`) para enriquecer a documentação.
 
 ---
 
 ## 🧩 Módulos e funcionalidades
 
-Pelo que já aparece na interface (landing) e na estrutura do repositório:
-
 ### 🔐 Autenticação (`src/auth`)
-- Login e cadastro com CTA direto pela landing.
-- Fluxo de recuperação de senha (rota dedicada).
+- Login e cadastro são intuitivos pela landing.
+- Recuperação de senha funcional.
 
 ### 📊 Dashboard (`src/dashboard`)
-- Painel principal do sistema (base para dados, cartões, telas e rotinas).
-- Gerenciamento de tema (Light/Dark) com script dedicado.
+- Painel principal do sistema (base para dados, telas, reservas, etc).
+- Gerenciamento de tema (Modo Claro/Modo Escuro).
 
 ### 🧾 Operação do condomínio (conceito/UX já refletida na UI)
-- Prestação de contas com visual simplificado.
+- Prestação de contas com visual bonito.
 - Reservas online para áreas comuns.
-- Livro de ocorrências (chamados) com acompanhamento.
-- Comunicados/avisos para moradores.
-- Gestão de encomendas.
-- Controle de acesso (estrutura pronta para evoluir com regras reais).
-
+- Seção de ocorrências/chamados que são vistos por todos, deixando todos cientes dos problemas, mas mantendo anonimato.
+- Gestão de encomendas(Ainda em desenvolvimento.
+- Controle de acesso (estrutura para evoluir com regras reais ainda em desenvolvimento).
 ---
 
 ## 🧰 Stack tecnológica
@@ -78,16 +73,16 @@ Pelo que já aparece na interface (landing) e na estrutura do repositório:
 
 ## 🧠 Arquitetura & diferenciais
 
-### 🌗 Tema sem “flash”
-O tema é aplicado **antes** do CSS carregar (anti-flash), garantindo experiência consistente ao alternar entre Light/Dark.
+### 🌗 Tema sem “bug de flash”
+O tema é aplicado **antes** do CSS carregar (anti-flash), garantindo que vc nao fique cego ao alternar entre Light/Dark.
 
 ### ⚡ Performance adaptativa (FPS + hardware)
-O arquivo `src/performance.js` implementa um “detector de performance” que:
+O arquivo `src/performance.js` implementa um detector de performance que:
 - Cacheia o modo no `localStorage` (`performance_mode`).
 - Detecta sinais de hardware fraco (memória baixa, poucos núcleos, mobile e suporte a `backdrop-filter`).
-- Executa múltiplos testes curtos de FPS, remove outliers e decide entre **low-performance** e **high-performance**.
+- Executa testes curtos de FPS, remove outliers e decide entre **low-performance** e **high-performance**.
 
-> Resultado: interface pode degradar graciosamente em dispositivos fracos, mantendo fluidez.
+> Resultado: interface pode ficar mais simples em dispositivos fracos, porem mantendo fluidez.
 
 ---
 
@@ -97,7 +92,7 @@ O arquivo `src/performance.js` implementa um “detector de performance” que:
 /
 ├── src/
 │   ├── about/                # Página "Sobre"
-│   ├── auth/                 # Login, Registro, Recuperação
+│   ├── auth/                 # Login, Cadastro, Recuperação
 │   ├── dashboard/            # Painel (inclui theme.js)
 │   ├── services/             # Camada de serviços/integrações
 │   ├── imagens/              # Assets (Logo, mockups etc.)
