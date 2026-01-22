@@ -21,9 +21,6 @@
   <a href="#-módulos-e-funcionalidades">Funcionalidades</a> •
   <a href="#-stack-tecnológica">Stack</a> •
   <a href="#-arquitetura--diferenciais">Diferenciais</a> •
-  <a href="#-rotas-e-navegação-vercel">Rotas</a> •
-  <a href="#-como-rodar-localmente">Rodar local</a> •
-  <a href="#-deploy">Deploy</a> •
   <a href="#-contribuição">Contribuir</a>
 </p>
 
@@ -85,6 +82,14 @@ O arquivo `src/performance.js` implementa um detector de performance que:
 > Resultado: interface pode ficar mais simples em dispositivos fracos, porem mantendo fluidez.
 
 ---
+
+## 🤝 Contribuição
+
+Quer contribuir e melhorar o projeto junto?
+Só mandar um e-mail pra gente conversar e alinhar o que dá pra fazer:
+
+**📧 [eduguilhermebruscagim@gmail.com](mailto:eduguilhermebruscagim@gmail.com)**
+
 
 ## 🗂️ Estrutura do projeto
 
