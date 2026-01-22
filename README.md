@@ -1,87 +1,110 @@
-# Monitoramento de Condomínio - Enterprise Management System
+<div align="center">
 
+# 🏢 Gestão Inteligente de Condomínios
+**Plataforma web para transparência, organização e comunicação condominial — com UX moderna, tema claro/escuro e performance adaptativa.**
 
-> **Enterprise Overview:** Plataforma de gestão condominial *Fullstack* de alta performance, focada em segurança de dados (LGPD), automação de processos e experiência de usuário fluida (Apple-like UX).
+<!-- Badges -->
+<a href="LICENSE"><img alt="Licença" src="https://img.shields.io/badge/license-MIT-yellow.svg"></a>
+<img alt="Stack" src="https://img.shields.io/badge/stack-HTML%20%7C%20CSS%20%7C%20JS-0B1220">
+<img alt="Deploy" src="https://img.shields.io/badge/deploy-Vercel-black?logo=vercel">
 
-![Interface Preview](src/imagens/Mac.webp)
+<br/>
+<br/>
 
-## 🛡️ Segurança e Privacidade (Security First)
+<!-- Hero image (usa asset real do projeto) -->
+<img src="src/imagens/Mac.webp" alt="Preview do sistema (Landing/Dashboard)" width="920" />
 
-A arquitetura de segurança foi desenhada seguindo o princípio de *Zero Trust*. A validação de regras de negócio ocorre na camada de persistência, garantindo integridade independente da interface do cliente.
+<br/>
 
-* **Row Level Security (RLS):** O sistema implementa isolamento estrito de dados. Um morador jamais consegue acessar dados financeiros sensíveis ou perfis de terceiros, pois a barreira é imposta no nível do banco de dados.
-* **Role-Based Access Control (RBAC):** Hierarquia de permissões granular (Síndico > Morador), onde cada nível possui escopos de leitura e escrita rigidamente definidos.
-* **Proteção contra Conflitos:** O sistema de reservas utiliza validações para impedir duplicidade de agendamentos em tempo real (*Race Conditions*), garantindo que duas pessoas não reservem a mesma área simultaneamente.
-* **Conformidade LGPD:** Ferramentas nativas para o "Direito ao Esquecimento", permitindo a exclusão segura e completa dos dados de usuários e logs de acesso.
+<p>
+  <a href="#-visão-geral">Visão geral</a> •
+  <a href="#-módulos-e-funcionalidades">Funcionalidades</a> •
+  <a href="#-stack-tecnológica">Stack</a> •
+  <a href="#-arquitetura--diferenciais">Diferenciais</a> •
+  <a href="#-rotas-e-navegação-vercel">Rotas</a> •
+  <a href="#-como-rodar-localmente">Rodar local</a> •
+  <a href="#-deploy">Deploy</a> •
+  <a href="#-contribuição">Contribuir</a>
+</p>
 
-## ⚡ Diferenciais de Engenharia
-
-O projeto abandona frameworks pesados em favor de uma arquitetura "Vanilla" otimizada, resultando em desempenho mais leve.
-
-### 1. Motor de Performance Adaptativo
-O sistema inclui um módulo de telemetria (`performance.js`) que analisa o hardware do usuário em tempo real para aplicar os modos de desempenho.
-* **Dispositivos High-End:** Ativa efeitos de vidro (*Glassmorphism*), sombras dinâmicas e animações complexas.
-* **Dispositivos Low-End:** Degrada graciosamente a interface, removendo filtros pesados para manter a taxa de quadros (FPS) estável e a usabilidade fluida.
-
-### 2. Sincronização em Tempo Real
-Utilização de *WebSockets* para manter todos os painéis administrativos sincronizados.
-* Novas ocorrências e movimentações de caixa são mostradas instantaneamente para todos os administradores conectados, eliminando a necessidade de recarregar a página.
-
-### 3. UX/UI Design System
-* **Física de Interface:** As animações utilizam curvas de Bézier customizadas (`--ease-spring`) para ter animações fluidas estilo Apple.
-* **Temas Dinâmicos:** Suporte nativo a *Dark Mode* e *Light Mode*.
+</div>
 
 ---
 
-## 🛠️ Stack Tecnológica
+## ✨ Visão geral
 
-| Componente | Tecnologia | Detalhes |
-| :--- | :--- | :--- |
-| **Frontend** | Vanilla JS (ES6+) | Arquitetura baseada em módulos, sem dependências de frameworks monolíticos. |
-| **Backend** | Supabase (BaaS) | Infraestrutura *Serverless* escalável (PostgreSQL). |
-| **Auth** | JWT & OAuth | Sistema de autenticação bem robusto e gerenciamento de sessões. |
-| **Assets** | WebP & Vetores | Otimização de mídia para carregamento instantâneo. |
+O **Gestão Inteligente de Condomínios** é um sistema web voltado para centralizar o que mais gera atrito no dia a dia do condomínio: manutenção, gastos, reservas e ocorrências — com comunicação objetiva e acesso rápido às informações.  
+A aplicação é organizada por módulos (`about`, `auth` e `dashboard`) e usa uma base “vanilla” (HTML/CSS/JS), priorizando performance, clareza visual e navegação responsiva.
+
+> 💡 Dica de apresentação: mantenha `src/imagens/Mac.webp` como capa e adicione prints reais em `src/imagens/` (ex.: `screenshot-login.webp`, `screenshot-dashboard.webp`) para enriquecer a documentação.
 
 ---
 
-## 💎 Módulos do Sistema
+## 🧩 Módulos e funcionalidades
 
-### 📊 Gestão Financeira
-* **Caixa Digital:** Interface limpa para visualização de fluxo de caixa (entradas e saídas).
-* **Transparência:** Extratos públicos simplificados para prestação de contas aos condôminos.
+Pelo que já aparece na interface (landing) e na estrutura do repositório:
 
-### 📅 Central de Reservas
-* Seção de reservas para áreas comuns, afim de evitar lotação e melhorar organização (Salão de Festas, Churrasqueiras, Quadras).
-* Feedback visual sobre disponibilidade de datas.
+### 🔐 Autenticação (`src/auth`)
+- Login e cadastro com CTA direto pela landing.
+- Fluxo de recuperação de senha (rota dedicada).
 
-### 📝 Controle de Ocorrências
-* Seção de ocorrências: Abertura de chamado -> Análise do Síndico -> Resolução.
-* Somente administradores podem ver todas as ocorrências
+### 📊 Dashboard (`src/dashboard`)
+- Painel principal do sistema (base para dados, cartões, telas e rotinas).
+- Gerenciamento de tema (Light/Dark) com script dedicado.
 
-### 👥 Gestão de Comunidade
-* Seção de moradores para ver todos os residentes do seu condominío.
-* Seção automatizada com geração de avatares e dados puxados direto do registro.
+### 🧾 Operação do condomínio (conceito/UX já refletida na UI)
+- Prestação de contas com visual simplificado.
+- Reservas online para áreas comuns.
+- Livro de ocorrências (chamados) com acompanhamento.
+- Comunicados/avisos para moradores.
+- Gestão de encomendas.
+- Controle de acesso (estrutura pronta para evoluir com regras reais).
 
 ---
 
-## 📂 Estrutura do Projeto
+## 🧰 Stack tecnológica
 
-A organização do código segue o padrão de separação por domínio (*Domain-Driven*), facilitando a escalabilidade.
+<div align="center">
+
+| Camada | Tecnologias |
+|---|---|
+| UI | <img src="https://img.shields.io/badge/HTML5-e34f26?logo=html5&logoColor=fff"> <img src="https://img.shields.io/badge/CSS3-1572b6?logo=css3&logoColor=fff"> <img src="https://img.shields.io/badge/JavaScript-f7df1e?logo=javascript&logoColor=000"> |
+| Tipografia e ícones | <img src="https://img.shields.io/badge/Google%20Fonts-4285F4?logo=google&logoColor=fff"> <img src="https://img.shields.io/badge/Font%20Awesome-528dd7?logo=fontawesome&logoColor=fff"> |
+| Deploy | <img src="https://img.shields.io/badge/Vercel-000?logo=vercel&logoColor=fff"> |
+
+</div>
+
+---
+
+## 🧠 Arquitetura & diferenciais
+
+### 🌗 Tema sem “flash”
+O tema é aplicado **antes** do CSS carregar (anti-flash), garantindo experiência consistente ao alternar entre Light/Dark.
+
+### ⚡ Performance adaptativa (FPS + hardware)
+O arquivo `src/performance.js` implementa um “detector de performance” que:
+- Cacheia o modo no `localStorage` (`performance_mode`).
+- Detecta sinais de hardware fraco (memória baixa, poucos núcleos, mobile e suporte a `backdrop-filter`).
+- Executa múltiplos testes curtos de FPS, remove outliers e decide entre **low-performance** e **high-performance**.
+
+> Resultado: interface pode degradar graciosamente em dispositivos fracos, mantendo fluidez.
+
+---
+
+## 🗂️ Estrutura do projeto
 
 ```text
 /
 ├── src/
-│   ├── about/              # Landing Page Institucional
-│   ├── auth/               # Módulos de Identidade (Login, Registro, Recuperação)
-│   ├── dashboard/          # Núcleo da Aplicação (SPA Logic)
-│   │   ├── dashboard.js    # Gerenciamento de Estado & Controladores
-│   │   ├── dashboard.css   # Estilização do Painel
-│   │   └── theme.js        # Logica de Temas (Dark/Light)
-│   ├── services/           # Camada de Infraestrutura (API Client)
-│   ├── imagens/            # Assets Otimizados
-│   ├── global.css          # Design Tokens & Variáveis CSS
-│   ├── index.html          # Ponto de Entrada
-│   └── performance.js      # Motor de Detecção de Hardware
-├── .gitignore
+│   ├── about/                # Página "Sobre"
+│   ├── auth/                 # Login, Registro, Recuperação
+│   ├── dashboard/            # Painel (inclui theme.js)
+│   ├── services/             # Camada de serviços/integrações
+│   ├── imagens/              # Assets (Logo, mockups etc.)
+│   ├── global.css            # Tokens/variáveis e estilos globais
+│   ├── index.css             # Estilos da landing
+│   ├── index.html            # Entrada (landing)
+│   └── performance.js        # Detector de performance (FPS + hardware)
+├── vercel.json               # Rotas amigáveis + headers + cache
 ├── LICENSE
 └── README.md
