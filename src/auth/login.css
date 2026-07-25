@@ -142,25 +142,23 @@ Versão: Apple Physics (Clean Grey Borders - FIXED)
     padding-right: 40px;
   }
 
-  /* --- ESTADO DE FOCO (CLEAN GREY + LEVITAÇÃO) --- */
+  /* --- ESTADO DE FOCO --- */
 .input-wrapper input:focus,
 .input-wrapper select:focus {
   background: var(--bg-input-focus);
-  /* 🎯 Borda original */
-  border-color: #cbd5e1;
-  /* 💫 Sombra original */
-  box-shadow: 0 0 0 3px rgba(203, 213, 225, 0.15);
-  outline: none;
-  /* ✨ Levitação suave para feedback */
+  border-color: var(--primary) !important;
+  box-shadow: none !important;
+  outline: none !important;
   transform: translateY(-1px) !important;
-  transition: all 0.3s var(--ease-spring);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 /* Dark Mode Focus */
 [data-theme="dark"] .input-wrapper input:focus,
 [data-theme="dark"] .input-wrapper select:focus {
-  border-color: rgba(255,255,255, 0.3);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+  border-color: var(--primary) !important;
+  box-shadow: none !important;
+  outline: none !important;
   transform: translateY(-1px) !important;
 }
 

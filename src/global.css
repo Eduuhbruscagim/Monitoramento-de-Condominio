@@ -15,9 +15,9 @@
   --bg-input: rgba(255, 255, 255, 0.55);
   --bg-input-focus: #ffffff;
   
-  /* Cores de texto com contraste WCAG AA */
+  /* Cores de texto com contraste WCAG AA (>= 4.5:1) */
   --text-main: #0f172a;
-  --text-secondary: #475569;
+  --text-secondary: #334155;
   --text-inverse: #ffffff;
   
   /* Bordas e sombras */
@@ -74,11 +74,11 @@
   --bg-input-focus: rgba(58, 58, 60, 0.88);
   
   --text-main: #f8fafc;
-  --text-secondary: #cbd5e1;
+  --text-secondary: #e2e8f0;
   --text-inverse: #000000;
   
   --border-glass: rgba(84, 84, 88, 0.48);
-  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.64), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-glass: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
@@ -104,12 +104,20 @@
 
 html {
   scroll-behavior: smooth;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Oculta completamente a barra de rolagem visual mantendo a funcionalidade de scroll ativa */
+html, body, * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 ::-webkit-scrollbar {
-  display: none;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 body {
@@ -122,6 +130,15 @@ body {
   overflow-x: hidden;
   font-size: var(--font-size-base);
   transition: background 0.5s var(--ease-flow), color 0.3s ease;
+}
+
+/* Alinhamento numérico tabular para métricas e dados (NNGroup / Apple HIG) */
+.stat-value,
+.glass-table td,
+.kpi-number,
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 /* --------------------------------------------------------------------------
@@ -143,16 +160,55 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   4. ACESSIBILIDADE - NAVEGAÇÃO POR TECLADO
+   4. ACESSIBILIDADE - NAVEGAÇÃO POR TECLADO & FOCO (WCAG 2.2 SC 2.4.7 / 2.4.13)
 -------------------------------------------------------------------------- */
 
-/* Remove outline padrão feio do navegador */
 *:focus {
   outline: none;
 }
 
-/* Outline APENAS para navegação por teclado (não mouse) */
-/* ❌ INPUTS EXCLUÍDOS - eles já têm estilo próprio */
+/* Previne duplicação visual de borda e hover dentro do .input-wrapper */
+.input-wrapper input,
+.input-wrapper select,
+.input-wrapper textarea {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.input-wrapper input:focus,
+.input-wrapper input:focus-visible,
+.input-wrapper select:focus,
+.input-wrapper select:focus-visible,
+.input-wrapper textarea:focus,
+.input-wrapper textarea:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Foco unificado no container .input-wrapper (Somente a borda azul limpa, sem brilho/sombra) */
+.input-wrapper:focus-within {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  box-shadow: none !important;
+}
+
+/* Foco unificado para campos autônomos (selects, textareas e inputs isolados) */
+.glass-select:focus-visible,
+.glass-select:focus,
+input:not(.input-wrapper input):focus-visible,
+input:not(.input-wrapper input):focus,
+select:not(.input-wrapper select):focus-visible,
+select:not(.input-wrapper select):focus,
+textarea:not(.input-wrapper textarea):focus-visible,
+textarea:not(.input-wrapper textarea):focus {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  box-shadow: none !important;
+}
+
+/* Focus-visible exclusivo para botões e links de navegação por teclado */
 button:focus-visible,
 .btn:focus-visible,
 .action-btn:focus-visible,
@@ -160,15 +216,15 @@ a:focus-visible,
 .menu-item:focus-visible,
 .btn-icon-glass:focus-visible,
 .tab-btn:focus-visible {
-  outline: 3px solid var(--primary);
-  outline-offset: 3px;
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
 }
 
 /* Estilo especial para botões importantes */
 .btn-primary:focus-visible {
-  outline: 3px solid var(--primary);
-  outline-offset: 3px;
-  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15);
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25) !important;
 }
 
 /* Skip to content link */
@@ -222,7 +278,7 @@ textarea,
 .notifications-dropdown,
 .user-profile-mini,
 .sidebar-logo {
-  transition: all 0.4s var(--ease-spring);
+  transition: transform 150ms ease-out, opacity 150ms ease-out, background-color 150ms ease-out, border-color 150ms ease-out, box-shadow 150ms ease-out;
   outline: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -303,21 +359,25 @@ button,
   justify-content: center;
 }
 
-.btn-icon-glass {
+.btn-icon-glass,
+.mobile-toggle,
+.icon-btn {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid var(--border-glass);
   color: var(--text-main);
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: var(--radius-full);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
   cursor: pointer;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  transition: all 0.4s var(--ease-spring);
+  transition: transform 150ms ease-out, background 150ms ease-out;
 }
 
 /* ✅ CORREÇÃO: will-change aplicado APENAS no hover */
@@ -633,4 +693,18 @@ footer {
 
 .low-performance * {
   transition-duration: 0.15s !important;
+}
+
+/* --------------------------------------------------------------------------
+   12. ACESSIBILIDADE: REDUCED MOTION (WCAG 2.2 SC 2.3.3)
+-------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

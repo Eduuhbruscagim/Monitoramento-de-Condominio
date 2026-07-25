@@ -635,13 +635,45 @@ const SkeletonFactory = {
  */
 const ModalUX = {
   overlays: [],
+  previousActiveElement: null,
 
   init() {
     this.overlays = Array.from(document.querySelectorAll(".modal-overlay"));
 
     this.overlays.forEach((overlay) => {
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+
       overlay.addEventListener("click", (e) => {
         if (e.target === overlay) this.close(overlay);
+      });
+
+      // Trap focus dentro do modal aberto (WCAG 2.2 SC 2.4.3 Focus Order)
+      overlay.addEventListener("keydown", (e) => {
+        if (e.key !== "Tab") return;
+
+        const focusables = Array.from(
+          overlay.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter((el) => !el.disabled && el.offsetWidth > 0 && el.offsetHeight > 0);
+
+        if (focusables.length === 0) return;
+
+        const firstEl = focusables[0];
+        const lastEl = focusables[focusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstEl) {
+            e.preventDefault();
+            lastEl.focus();
+          }
+        } else {
+          if (document.activeElement === lastEl) {
+            e.preventDefault();
+            firstEl.focus();
+          }
+        }
       });
     });
 
@@ -665,22 +697,37 @@ const ModalUX = {
 
   open(overlay) {
     if (!overlay) return;
+    this.previousActiveElement = document.activeElement;
     overlay.classList.add("active");
+    overlay.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
+
+    // Foca o primeiro elemento focado dentro do modal
+    setTimeout(() => {
+      const focusable = overlay.querySelector(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable) focusable.focus();
+    }, 50);
   },
 
   close(overlay) {
     if (!overlay) return;
     overlay.classList.remove("active");
+    overlay.setAttribute("aria-hidden", "true");
     const algumAberto = this.overlays.some((m) =>
       m.classList.contains("active")
     );
     if (!algumAberto) document.body.classList.remove("modal-open");
+
+    // Devolve o foco ao elemento que abriu o modal (WCAG 2.2 SC 2.4.3)
+    if (this.previousActiveElement && typeof this.previousActiveElement.focus === "function") {
+      this.previousActiveElement.focus();
+    }
   },
 
   closeAll() {
-    this.overlays.forEach((m) => m.classList.remove("active"));
-    document.body.classList.remove("modal-open");
+    this.overlays.forEach((o) => this.close(o));
   },
 };
 
@@ -894,25 +941,28 @@ const UI = {
     }
 
     const souDono = isAdmin();
-    this.elements.recentActivities.innerHTML = futuras
-      .map((r) => {
-        const diffDias = Math.ceil((r.dataObj - hoje) / TIME.DAY);
-        const quando = diffDias === 0 ? "Hoje" : `Em ${diffDias}d`;
-        const linhaInfo = souDono
-          ? Utils.safe(r.nome_morador || "Morador")
-          : `Data: ${r.dataObj.toLocaleDateString("pt-BR")}`;
+    const fragment = document.createDocumentFragment();
+    futuras.forEach((r) => {
+      const diffDias = Math.ceil((r.dataObj - hoje) / TIME.DAY);
+      const quando = diffDias === 0 ? "Hoje" : `Em ${diffDias}d`;
+      const linhaInfo = souDono
+        ? Utils.safe(r.nome_morador || "Morador")
+        : `Data: ${r.dataObj.toLocaleDateString("pt-BR")}`;
 
-        return `
-        <div class="activity-item">
-          <div class="activity-icon bg-blue"><i class="fa-solid fa-calendar-day"></i></div>
-          <div class="activity-info">
-            <h4>Reserva: ${Utils.safe(r.area)}</h4>
-            <p>${linhaInfo}</p>
-          </div>
-          <span class="activity-time">${quando}</span>
-        </div>`;
-      })
-      .join("");
+      const div = document.createElement("div");
+      div.className = "activity-item";
+      div.innerHTML = `
+        <div class="activity-icon bg-blue"><i class="fa-solid fa-calendar-day"></i></div>
+        <div class="activity-info">
+          <h4>Reserva: ${Utils.safe(r.area)}</h4>
+          <p>${linhaInfo}</p>
+        </div>
+        <span class="activity-time">${quando}</span>`;
+      fragment.appendChild(div);
+    });
+
+    this.elements.recentActivities.innerHTML = "";
+    this.elements.recentActivities.appendChild(fragment);
   },
 };
 
@@ -963,6 +1013,7 @@ const UINotifications = {
   open() {
     this.isOpen = true;
     this.panel.classList.add("active");
+    if (this.btn) this.btn.setAttribute("aria-expanded", "true");
     if (this.overlay) this.overlay.classList.add("active");
     if (this.wrapper) this.wrapper.classList.add("highlight-wrapper");
     this.render();
@@ -971,6 +1022,7 @@ const UINotifications = {
   close() {
     this.isOpen = false;
     this.panel.classList.remove("active");
+    if (this.btn) this.btn.setAttribute("aria-expanded", "false");
     if (this.overlay) this.overlay.classList.remove("active");
     if (this.wrapper) this.wrapper.classList.remove("highlight-wrapper");
   },
@@ -1877,7 +1929,7 @@ const UIMoradores = {
           <div class="user-cell">
             <img src="${
               m.img || Utils.gerarAvatarPadrao(m.nome)
-            }" class="user-avatar" onerror="this.src='${Utils.gerarAvatarPadrao(
+            }" class="user-avatar" width="40" height="40" loading="lazy" onerror="this.src='${Utils.gerarAvatarPadrao(
           m.nome
         )}'" />
             <div><strong class="td-titulo">${Utils.safe(
@@ -1902,9 +1954,20 @@ const UIMoradores = {
  * ============================================================================
  */
 let dashboardChannel = null;
+let realtimeDebounceTimers = {};
 
-// ✅ CORREÇÃO: Renderização otimizada - apenas atualiza item específico
 function handleRealtimeUpdate(table, payload) {
+  if (realtimeDebounceTimers[table]) {
+    clearTimeout(realtimeDebounceTimers[table]);
+  }
+  
+  realtimeDebounceTimers[table] = setTimeout(() => {
+    processRealtimeUpdate(table, payload);
+  }, 250);
+}
+
+// ✅ CORREÇÃO: Renderização otimizada em tempo ocioso - apenas atualiza item específico
+function processRealtimeUpdate(table, payload) {
   // Invalida cache relacionado
   cache.invalidate(table);
   cache.invalidate('notificacoes');
@@ -2053,8 +2116,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       document
         .querySelectorAll(".menu-item")
-        .forEach((l) => l.classList.remove("active"));
+        .forEach((l) => {
+          l.classList.remove("active");
+          l.removeAttribute("aria-current");
+        });
       link.classList.add("active");
+      link.setAttribute("aria-current", "page");
 
       document
         .querySelectorAll(".view-section")

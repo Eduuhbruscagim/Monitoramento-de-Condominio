@@ -13,14 +13,14 @@
     width: 90%;
     max-width: 1100px;
     background: var(--bg-glass-nav);
-    backdrop-filter: saturate(200%) blur(40px);
-    -webkit-backdrop-filter: saturate(200%) blur(40px);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
     border: 1px solid var(--border-glass);
     box-shadow: var(--shadow-glass), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
     border-radius: 100px;
     padding: 12px 24px;
     z-index: 10000;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.3s ease, background 0.3s ease;
     overflow: hidden;
     max-height: 70px;
   }
@@ -31,11 +31,11 @@
 
   .floating-dock.menu-open {
     background: var(--bg-card);
-    backdrop-filter: saturate(200%) blur(50px);
-    -webkit-backdrop-filter: saturate(200%) blur(50px);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
     border-radius: 32px;
     max-height: 500px;
-    box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.2);
     border-color: var(--border-glass);
   }
 

@@ -16,7 +16,7 @@
 
   <title>Painel - Condomínio App</title>
   <link rel="icon" type="image/png" href="../imagens/Logo.png">
-  <script src="../performance.js"></script>
+  <script src="../performance.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -29,28 +29,28 @@
   <div class="dashboard-container">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <img src="../imagens/Logo.webp" alt="Logo" class="sidebar-logo">
+        <img src="../imagens/Logo.webp" alt="Logo" class="sidebar-logo" width="40" height="40" loading="lazy">
       </div>
 
-      <nav class="sidebar-menu">
+      <nav class="sidebar-menu" aria-label="Navegação Principal">
         <a href="#" class="menu-item active" data-view="view-dashboard" data-title="Visão Geral"
-          aria-label="Visão Geral" title="Visão Geral">
-          <i class="fa-solid fa-house"></i>
+          aria-label="Visão Geral" title="Visão Geral" aria-current="page">
+          <i class="fa-solid fa-house" aria-hidden="true"></i>
           <span>Visão Geral</span>
         </a>
         <a href="#" class="menu-item" data-view="view-ocorrencias" data-title="Ocorrências" aria-label="Ocorrências"
           title="Ocorrências">
-          <i class="fa-solid fa-triangle-exclamation"></i>
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
           <span>Ocorrências</span>
         </a>
         <a href="#" class="menu-item" data-view="view-moradores" data-title="Moradores" aria-label="Moradores"
           title="Moradores">
-          <i class="fa-solid fa-users"></i>
+          <i class="fa-solid fa-users" aria-hidden="true"></i>
           <span>Moradores</span>
         </a>
         <a href="#" class="menu-item" data-view="view-reservas" data-title="Reservas" aria-label="Reservas"
           title="Reservas">
-          <i class="fa-solid fa-calendar-check"></i>
+          <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
           <span>Reservas</span>
         </a>
       </nav>
@@ -58,13 +58,13 @@
       <div class="sidebar-footer">
         <a href="javascript:void(0)" class="menu-item logout" aria-label="Sair do sistema" title="Sair do sistema"
           id="btn-logout">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
           <span>Sair do Sistema</span>
         </a>
 
         <div class="user-profile-mini">
           <img src="" alt="Avatar" class="avatar-circle-img" id="user-avatar-img" style="display: none;">
-          <div class="avatar-circle" id="user-avatar">?</div>
+          <div class="avatar-circle" id="user-avatar" aria-hidden="true">?</div>
           <div class="user-info">
             <strong id="user-name">Carregando...</strong>
             <small id="user-role">...</small>
@@ -79,18 +79,22 @@
 
         <div class="top-actions">
           <div class="notifications-wrapper">
-            <button class="icon-btn" id="btn-notifications" aria-label="Notificações" title="Notificações">
-              <i class="fa-regular fa-bell"></i>
+            <button class="icon-btn" id="btn-notifications" aria-label="Notificações Recentes" title="Notificações" aria-expanded="false" aria-controls="notifications-panel">
+              <i class="fa-regular fa-bell" aria-hidden="true"></i>
             </button>
 
-            <div class="notifications-dropdown" id="notifications-panel">
+            <div class="notifications-dropdown" id="notifications-panel" role="region" aria-label="Painel de Notificações">
               <div class="notif-header">
                 Notificações Recentes
                 <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 500;">Tempo Real</span>
               </div>
               <div id="notifications-list">
-                <div style="padding: 20px; text-align: center; color: var(--text-tertiary); font-size: 0.9rem;">
-                  Carregando...
+                <div class="notif-item">
+                  <div class="skeleton skeleton-avatar" style="border-radius:12px;"></div>
+                  <div class="notif-content" style="flex:1;">
+                    <div class="skeleton skeleton-text" style="width:70%;"></div>
+                    <div class="skeleton skeleton-text" style="width:40%;"></div>
+                  </div>
                 </div>
               </div>
             </div>

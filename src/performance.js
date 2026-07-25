@@ -163,11 +163,19 @@
     }
   };
 
-  // 🚀 Executa ao carregar
+  // 🚀 Executa em tempo ocioso (requestIdleCallback) para não bloquear o render inicial
+  const schedulePerformanceCheck = () => {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => autoDetectPerformance(), { timeout: 2000 });
+    } else {
+      setTimeout(autoDetectPerformance, 800);
+    }
+  };
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', autoDetectPerformance);
+    window.addEventListener('load', schedulePerformanceCheck);
   } else {
-    autoDetectPerformance();
+    schedulePerformanceCheck();
   }
 
 })();

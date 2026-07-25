@@ -24,7 +24,7 @@
   <meta property="og:description" content="Modernize a gestão do seu condomínio com transparência e tecnologia.">
   <meta property="og:image" content="imagens/Mac.png">
 
-  <script src="performance.js"></script>
+  <script src="performance.js" defer></script>
 
   <link rel="icon" type="image/png" href="imagens/Logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,7 +45,7 @@
   <nav class="floating-dock">
     <div class="dock-content">
       <a href="#" class="logo">
-        <img src="imagens/Logo.webp" alt="Logo do Sistema de Condomínio" class="logo-img">
+        <img src="imagens/Logo.webp" alt="Logo do Sistema de Condomínio" class="logo-img" width="40" height="40" loading="lazy">
       </a>
 
       <!-- Desktop Links -->
@@ -71,14 +71,14 @@
           <i class="fa-solid fa-sun"></i>
         </button>
 
-        <button class="mobile-toggle" aria-label="Abrir Menu">
+        <button class="mobile-toggle" aria-label="Abrir Menu de Navegação" aria-expanded="false" aria-controls="mobile-menu">
           <i class="fa-solid fa-bars"></i>
         </button>
       </div>
     </div>
 
     <!-- Mobile Menu Drawer (acoplado) -->
-    <div class="mobile-menu-drawer">
+    <div class="mobile-menu-drawer" id="mobile-menu" role="region" aria-label="Menu Mobile">
       <ul class="mobile-links">
         <li><a href="#inicio">Início</a></li>
         <li><a href="#funcionalidades">Funcionalidades</a></li>
@@ -115,7 +115,7 @@
     </div>
 
     <div class="hero-image">
-      <img src="imagens/Mac.webp" alt="Demonstração do Painel Administrativo em um Tablet" class="laptop-mockup">
+      <img src="imagens/Mac.webp" alt="Demonstração do Painel Administrativo em um Tablet" class="laptop-mockup" width="650" height="420" loading="lazy">
     </div>
   </section>
 
@@ -227,19 +227,19 @@
     if (mobileBtn && mobileMenu) {
       mobileBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        mobileMenu.classList.toggle('active');
+        const isOpen = mobileMenu.classList.toggle('active');
         dock.classList.toggle('menu-open');
+        mobileBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        mobileBtn.setAttribute('aria-label', isOpen ? 'Fechar Menu de Navegação' : 'Abrir Menu de Navegação');
 
         const icon = mobileBtn.querySelector('i');
-        if (mobileMenu.classList.contains('active')) {
+        if (isOpen) {
           icon.classList.remove('fa-bars');
           icon.classList.add('fa-xmark');
-          // Mostra o botão de tema
           if (themeBtn) themeBtn.classList.add('show');
         } else {
           icon.classList.remove('fa-xmark');
           icon.classList.add('fa-bars');
-          // Esconde o botão de tema
           if (themeBtn) themeBtn.classList.remove('show');
         }
       });
@@ -249,10 +249,11 @@
         if (mobileMenu.classList.contains('active') && !dock.contains(e.target)) {
           mobileMenu.classList.remove('active');
           dock.classList.remove('menu-open');
+          mobileBtn.setAttribute('aria-expanded', 'false');
+          mobileBtn.setAttribute('aria-label', 'Abrir Menu de Navegação');
           const icon = mobileBtn.querySelector('i');
           icon.classList.remove('fa-xmark');
           icon.classList.add('fa-bars');
-          // Esconde o botão de tema
           if (themeBtn) themeBtn.classList.remove('show');
         }
       });

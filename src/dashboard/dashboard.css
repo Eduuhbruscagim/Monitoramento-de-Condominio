@@ -22,9 +22,9 @@
     --border-input: #e2e8f0;
     --border-divider: rgba(0, 0, 0, 0.05);
     
-    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-    --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.12);
-    --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    --shadow-glass: 0 4px 16px 0 rgba(31, 38, 135, 0.05);
+    --shadow-hover: 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+    --shadow-card: 0 6px 16px -3px rgba(0, 0, 0, 0.04);
     
     --text-main: #0f172a;
     --text-secondary: #64748b;
@@ -56,11 +56,11 @@
     --radius-2xl: 32px;
     --radius-full: 50%;
   
-    /* === BLUR SYSTEM === */
-    --blur-sm: 12px;
-    --blur-md: 16px;
-    --blur-lg: 24px;
-    --blur-xl: 40px;
+    /* === BLUR SYSTEM (Otimizado para GPU) === */
+    --blur-sm: 6px;
+    --blur-md: 8px;
+    --blur-lg: 12px;
+    --blur-xl: 16px;
   
     /* === Z-INDEX SYSTEM === */
     --z-base: 1;
@@ -72,9 +72,9 @@
     --z-notification: 2000;
     --z-toast: 3000;
   
-    /* === EASING FUNCTIONS === */
+    /* === EASING FUNCTIONS (Apple HIG Critically Damped Spring) === */
     --ease-flow: cubic-bezier(0.19, 1, 0.22, 1);
-    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-snappy: cubic-bezier(0.4, 0, 0.2, 1);
   
     /* === LAYOUT === */
@@ -92,7 +92,7 @@
     --bg-body: #000000;
     --bg-glass-nav: rgba(28, 28, 30, 0.72);
     --bg-card: rgba(28, 28, 30, 0.6);
-    --bg-input: rgb(0 0 255 / 0%);
+    --bg-input: rgba(44, 44, 46, 0.68);
     --bg-input-focus: rgba(58, 58, 60, 0.88);
     --bg-hover: rgba(51, 65, 85, 0.4);
   
@@ -106,10 +106,10 @@
     --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
     --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
   
-    /* === TEXTS === */
+    /* === TEXTS (WCAG 2.2 SC 1.4.3 >= 4.5:1) === */
     --text-main: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-tertiary: #64748b;
+    --text-secondary: #e2e8f0;
+    --text-tertiary: #94a3b8;
   
     /* === STATUS COLORS (ajustados para dark) === */
     --success-bg: rgba(48, 209, 88, 0.15);
@@ -813,7 +813,7 @@
     top: 16px;
     right: 16px;
     display: flex;
-    gap: 10px;
+    gap: 8px;
     z-index: var(--z-base);
   }
   
@@ -825,8 +825,10 @@
   
   .kpi-plus,
   .kpi-eye {
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     border-radius: var(--radius-full);
     border: 1px solid var(--border-glass);
     background: var(--bg-card);
@@ -837,12 +839,12 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s var(--ease-flow);
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
   }
   
   .kpi-plus:hover,
   .kpi-eye:hover {
-    transform: translateY(-2px);
+    transform: scale(1.05);
     background: var(--primary);
     color: #ffffff;
     box-shadow: 0 10px 18px rgba(37, 99, 235, 0.3);
@@ -850,6 +852,7 @@
   
   .stat-card-kpi {
     position: relative;
+    padding-right: 110px; /* Previne colisão do texto com os botões de ação (Lei de Fitts) */
   }
   
   .stat-card-kpi > .kpi-plus {
@@ -1026,11 +1029,12 @@
   }
   
   .glass-table tr {
-    transition: all 0.3s var(--ease-flow);
+    transition: background-color 150ms ease-out;
   }
   
   .glass-table tr:hover td {
     background: var(--bg-hover);
+    transition: background-color 150ms ease-out;
   }
   
   .glass-table th:last-child,
@@ -1624,13 +1628,27 @@
     transition: color 0.2s ease;
   }
   
-  .input-wrapper input {
-    border: none;
+  .input-wrapper input,
+  .input-wrapper select,
+  .input-wrapper textarea {
+    border: none !important;
     background: transparent;
     padding: 12px 0;
     width: 100%;
-    outline: none;
+    outline: none !important;
+    box-shadow: none !important;
     color: var(--text-main);
+  }
+
+  .input-wrapper input:focus,
+  .input-wrapper input:focus-visible,
+  .input-wrapper select:focus,
+  .input-wrapper select:focus-visible,
+  .input-wrapper textarea:focus,
+  .input-wrapper textarea:focus-visible {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
   
   .input-wrapper input::placeholder {
@@ -1652,8 +1670,9 @@
   .input-wrapper:focus-within,
   .glass-select:focus {
     background: var(--bg-input-focus);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+    border-color: var(--primary) !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
   
   .input-wrapper:focus-within i {
@@ -2817,8 +2836,8 @@
 [data-theme="dark"] .glass-select:focus {
   background: var(--bg-input-focus) !important;
   border-color: var(--primary) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 [data-theme="dark"] .input-wrapper:focus-within i {

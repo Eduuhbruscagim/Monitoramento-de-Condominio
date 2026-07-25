@@ -70,7 +70,7 @@
           <a href="forgot-password.html" class="forgot-pass">Esqueceu a senha?</a>
         </div>
 
-        <div id="feedback" class="status-msg"></div>
+        <div id="feedback" class="status-msg" role="alert" aria-live="assertive"></div>
 
         <button type="submit" class="btn btn-primary btn-full">
           Entrar na Plataforma
@@ -97,6 +97,29 @@
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
       }
+
+      // ==========================================
+      // ⚡ VALIDAÇÃO INLINE EM TEMPO REAL (Blur - Baymard Research)
+      // ==========================================
+      document.addEventListener("DOMContentLoaded", () => {
+        const emailInput = document.getElementById("email");
+        const feedbackBox = document.getElementById("feedback");
+
+        if (emailInput) {
+          emailInput.addEventListener("blur", () => {
+            const val = emailInput.value.trim();
+            if (val && !validarEmail(val)) {
+              feedbackBox.innerText = "Por favor, digite um endereço de e-mail válido.";
+              feedbackBox.className = "status-msg error";
+              feedbackBox.style.display = "block";
+            } else if (val && validarEmail(val)) {
+              if (feedbackBox.classList.contains("error")) {
+                feedbackBox.style.display = "none";
+              }
+            }
+          });
+        }
+      });
 
       // ==========================================
       // 📝 FUNÇÃO PRINCIPAL DE LOGIN
